@@ -1,0 +1,52 @@
+// Each #kernel tells which function to compile; you can have many kernels
+#pragma kernel CSMain
+
+// Create a RenderTexture with enableRandomWrite flag and set it
+// with cs.SetTexture
+RWTexture2D<float4> Result;
+Texture2D<float4> InputImage;
+
+[numthreads(32,32,1)]
+void CSMain (uint3 id : SV_DispatchThreadID)
+{
+    // TODO: insert actual code here!
+    float2 aboveShift = float2(id.x, (id.y + 1) % 512);
+    float2 leftShift = float2((id.x -1) % 512, id.y);
+    float2 rightShift = float2((id.x + 1) % 512, id.y);
+    float2 bottomShift = float2(id.x, (id.y - 1) % 512);
+
+    // float radius = 4;
+    // float area = radius * radius * 3.141 / 4;
+
+    // for (int x = -radius; x < radius; x++)
+    // {
+    //     float yRadius = sqrt(radius * radius - x * x);
+    //     for (int y = -yRadius; y <= yRadius; y++)
+    //     {
+    //         float2 index = float2(id.x + x, id.y + y);
+    //         if (index[0] < 0 || index[0] > 512 || index[1] < 0 || index[1] > 512)
+    //         {
+    //             continue;
+    //         }
+
+    //         Result[id.xy] += float4(InputImage[index].x / area, InputImage[index].y / area, InputImage[index].z / area, 1.0);
+    //     }
+    // }
+
+    Result[id.xy] = float4(
+        (
+            InputImage[id.xy].x + 
+            InputImage[aboveShift].x + 
+            InputImage[leftShift].x + 
+            InputImage[rightShift].x + 
+            InputImage[bottomShift].x
+        ) / 5, 
+        (
+            InputImage[id.xy].y + 
+            InputImage[aboveShift].y + 
+            InputImage[leftShift].y + 
+            InputImage[rightShift].y + 
+            InputImage[bottomShift].y
+        ) / 5, 
+        InputImage[id.xy].z, 0.0);
+}
