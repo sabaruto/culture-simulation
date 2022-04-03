@@ -28,11 +28,12 @@ public class ComputeShaderTest : MonoBehaviour
 
     void Render(Texture2D inputImage)
     {
-        RenderTexture newTexture = new RenderTexture(renderTexture.width, renderTexture.height, 24);
+        RenderTexture newTexture = new RenderTexture(renderTexture.width, renderTexture.height, 1);
 
         newTexture.enableRandomWrite = true;
         computeShader.SetTexture(0, "Result", newTexture);
         computeShader.SetTexture(0, "InputImage", inputImage);
+        computeShader.SetInt("Resolution", renderTexture.width);
         computeShader.Dispatch(0, newTexture.width / 32, newTexture.height / 32, 1);
 
         Graphics.Blit(newTexture, renderTexture);

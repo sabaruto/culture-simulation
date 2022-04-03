@@ -20,6 +20,6 @@ public class ConvertTexture : MonoBehaviour
     {
         tex2d = TextureConversion.ConvertTexture(texture);
 
-        sr.sprite = Sprite.Create(tex2d, new Rect(0.0f, 0.0f, tex2d.width, tex2d.height), new Vector2(0.5f, 0.5f), 512.0f);
+        sr.sprite = Sprite.Create(tex2d, new Rect(0.0f, 0.0f, tex2d.width, tex2d.height), new Vector2(0.5f, 0.5f), tex2d.width);
     }
 }
