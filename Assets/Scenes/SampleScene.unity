@@ -167,7 +167,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
-  m_RootOrder: 1
+  m_RootOrder: 2
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &519420028
 GameObject:
@@ -279,11 +279,11 @@ MonoBehaviour:
   m_GameObject: {fileID: 803316700}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 70c57f4546fd8bc45adeb7a132570b64, type: 3}
+  m_Script: {fileID: 11500000, guid: 57c932b06e604304abb0e0b599e36d9f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  texture: {fileID: 8400000, guid: 9541109a6f8d66b42b640da9cf2f20ed, type: 2}
-  tex2d: {fileID: 0}
+  scale: 0.1
+  squareSprite: {fileID: 7482667652216324306, guid: 312812a3e707e3c4e955744193cbc5fc, type: 3}
 --- !u!212 &803316702
 SpriteRenderer:
   m_ObjectHideFlags: 0
@@ -291,7 +291,7 @@ SpriteRenderer:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 803316700}
-  m_Enabled: 1
+  m_Enabled: 0
   m_CastShadows: 0
   m_ReceiveShadows: 0
   m_DynamicOccludee: 1
@@ -347,5 +347,5 @@ Transform:
   m_LocalScale: {x: 9, y: 9, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
-  m_RootOrder: 2
+  m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
