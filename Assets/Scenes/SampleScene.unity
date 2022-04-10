@@ -315,6 +315,7 @@ MonoBehaviour:
   backgroundShader: {fileID: 7200000, guid: 8458ff921e1c4504db227fae36bf3725, type: 3}
   squareSprite: {fileID: 7482667652216324306, guid: 312812a3e707e3c4e955744193cbc5fc, type: 3}
   squareUpdateRate: 1
+  neighourWeighting: 0.01
   scale: 0.1
   pixelWidth: 160
   pixelHeight: 90

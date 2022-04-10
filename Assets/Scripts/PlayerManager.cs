@@ -8,6 +8,12 @@ public struct Player
     public Dictionary<Belief, float> beliefScales;
 }
 
+public struct BufferPlayer
+{
+    public Vector2 position;
+    public Vector2 beliefScales;
+}
+
 public class PlayerManager : MonoBehaviour
 {
     [SerializeField] private GameObject personObject;
@@ -88,5 +94,32 @@ public class PlayerManager : MonoBehaviour
         }
 
         return newColor;
+    }
+
+    public BufferPlayer[] GetBufferPlayers()
+    {
+        BufferPlayer[] bufferPlayers = new BufferPlayer[players.Length];
+        for (int playerIndex = 0; playerIndex < players.Length; playerIndex++)
+        {
+            bufferPlayers[playerIndex] = ConvertPlayer(players[playerIndex]);
+        }
+
+        return bufferPlayers;
+    }
+
+    public BufferPlayer ConvertPlayer(Player player)
+    {
+        Vector2 beliefScales = new Vector2();
+        for (int beliefIndex = 0; beliefIndex < Beliefs.Count; beliefIndex++)
+        {
+            Belief currentBelief = Beliefs.GetBelief(beliefIndex);
+            beliefScales[beliefIndex] = player.beliefScales[currentBelief];
+        }
+
+        return new BufferPlayer
+        {
+            position = player.position, 
+            beliefScales = beliefScales
+        };
     }
 }

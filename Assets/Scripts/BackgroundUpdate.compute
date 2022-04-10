@@ -14,14 +14,18 @@ struct Belief
 
 struct Player
 {
-    RWStructuredBuffer<float> beliefStrength;
+    // TODO Create variable number of beliefs
+    float2 beliefStrength;
     float2 position;
 };
 
 int width;
 int height;
+float neighbourWeighting;
 
 RWStructuredBuffer<Square> squares;
+RWStructuredBuffer<Player> players;
+RWStructuredBuffer<Belief> beliefs;
 
 [numthreads(32,1,1)]
 void CSMain (uint3 id : SV_DispatchThreadID)
@@ -31,6 +35,8 @@ void CSMain (uint3 id : SV_DispatchThreadID)
     float4 newColor = float4(0, 0, 0, 1.0);
     Square square = squares[id.x];
 
+    // Define and find average of neighbour values
+    float4 neighbourColor = float4(0, 0, 0, 1.0);
     float surroundingSquareIndexes[] = 
     {
         (x-1) * height + y-1,
@@ -87,9 +93,48 @@ void CSMain (uint3 id : SV_DispatchThreadID)
 
         if (accessableSquares[indexIndex] == 1)
         {
-            newColor += squares[currentIndex].color / numSurroundingSquares;
+            neighbourColor += squares[currentIndex].color / numSurroundingSquares;
         }
     }
+
+    // Define and find average player values
+    float4 playerColor = float4(0, 0, 0, 1.0);
+    float beliefScale[] = {0, 0};
+    float2 position = square.position;
+    uint beliefIndex = 0;
+
+    for (uint playerIndex = 0; playerIndex < players.Length; playerIndex++)
+    {
+        Player currentPlayer = players[playerIndex];
+        float2 distanceVector = position - currentPlayer.position;
+        float distance = sqrt(distanceVector[0] * distanceVector[0] + distanceVector[1] * distanceVector[1]);
+        float currentWeight = 1.0f / (distance + 1);
+        
+        for (beliefIndex = 0; beliefIndex < beliefScale.Length; beliefIndex++)
+        {
+            beliefScale[beliefIndex] += currentWeight * currentPlayer.beliefStrength[beliefIndex];
+        }
+    }
+
+    // Scale the beliefScale
+    float totalBeliefScale = 0;
+    for (beliefIndex = 0; beliefIndex < beliefScale.Length; beliefIndex++)
+    {
+        totalBeliefScale += beliefScale[beliefIndex];
+    }
+
+    for (beliefIndex = 0; beliefIndex < beliefScale.Length; beliefIndex++)
+    {
+        if (beliefScale[beliefIndex] / totalBeliefScale > 1)
+        {
+            playerColor = float4(0, 0, 0, 1.0);
+            break;
+        }
+        playerColor += beliefs[beliefIndex].color * (beliefScale[beliefIndex] / totalBeliefScale);
+    }
+
+    // Merge the two colors
+    newColor = neighbourColor * neighbourWeighting + playerColor * (1 - neighbourWeighting);
     
     square.color = newColor;
     squares[id.x] = square;
