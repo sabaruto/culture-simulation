@@ -1,0 +1,97 @@
+// Each #kernel tells which function to compile; you can have many kernels
+#pragma kernel CSMain
+
+struct Square
+{
+    float2 position;
+    float4 color;
+};
+
+struct Belief
+{
+    float4 color;
+};
+
+struct Player
+{
+    RWStructuredBuffer<float> beliefStrength;
+    float2 position;
+};
+
+int width;
+int height;
+
+RWStructuredBuffer<Square> squares;
+
+[numthreads(32,1,1)]
+void CSMain (uint3 id : SV_DispatchThreadID)
+{
+    float x = id.x / height;
+    float y = id.x - x * height;
+    float4 newColor = float4(0, 0, 0, 1.0);
+    Square square = squares[id.x];
+
+    float surroundingSquareIndexes[] = 
+    {
+        (x-1) * height + y-1,
+        x * height + y-1,
+        (x+1) * height + y-1,
+        (x+1) * height + y,
+        (x+1) * height + y+1,
+        x * height + y+1,
+        (x-1) * height + y+1,
+        (x-1) * height + y,
+        x * height + y,
+        
+    };
+
+    int accessableSquares[] = {1, 1, 1, 1, 1, 1, 1, 1, 1};
+
+    if (x == 0)
+    {
+        accessableSquares[0] = 0;
+        accessableSquares[6] = 0;
+        accessableSquares[7] = 0;
+    }
+
+    if (y == 0)
+    {
+        accessableSquares[0] = 0;
+        accessableSquares[1] = 0;
+        accessableSquares[2] = 0;
+    }
+
+    if (x + 1 == width)
+    {
+        accessableSquares[2] = 0;
+        accessableSquares[3] = 0;
+        accessableSquares[4] = 0;
+    }
+
+    if (y + 1 == height)
+    {
+        accessableSquares[4] = 0;
+        accessableSquares[5] = 0;
+        accessableSquares[6] = 0;
+    }
+
+    int numSurroundingSquares = 0;
+    for (uint accessableIndex = 0; accessableIndex < accessableSquares.Length; accessableIndex++)
+    {
+        numSurroundingSquares += accessableSquares[accessableIndex];
+    }
+
+    for (uint indexIndex = 0; indexIndex < surroundingSquareIndexes.Length; indexIndex++)
+    {
+        int currentIndex = surroundingSquareIndexes[indexIndex];
+
+        if (accessableSquares[indexIndex] == 1)
+        {
+            newColor += squares[currentIndex].color / numSurroundingSquares;
+        }
+    }
+    
+    square.color = newColor;
+    squares[id.x] = square;
+}
+
