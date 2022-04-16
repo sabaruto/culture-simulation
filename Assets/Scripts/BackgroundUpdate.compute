@@ -4,7 +4,7 @@
 struct Square
 {
     float2 position;
-    float4 color;
+    float2 beliefStrength;
 };
 
 struct Belief
@@ -30,13 +30,14 @@ RWStructuredBuffer<Belief> beliefs;
 [numthreads(32,1,1)]
 void BackgroundUpdate (uint3 id : SV_DispatchThreadID)
 {
+    //TODO Fix Update
     float x = id.x / height;
     float y = id.x - x * height;
-    float4 newColor = float4(0, 0, 0, 1.0);
+    float newBeliefScale[] = {0, 0};
     Square square = squares[id.x];
 
     // Define and find average of neighbour values
-    float4 neighbourColor = float4(0, 0, 0, 1.0);
+    float neighbourBeliefScale[] = {0, 0};
     float surroundingSquareIndexes[] = 
     {
         (x-1) * height + y-1,
@@ -93,13 +94,15 @@ void BackgroundUpdate (uint3 id : SV_DispatchThreadID)
 
         if (accessableSquares[indexIndex] == 1)
         {
-            neighbourColor += squares[currentIndex].color / numSurroundingSquares;
+            for (uint beliefIndex = 0; beliefIndex < newBeliefScale.Length; beliefIndex++)
+            {
+                neighbourBeliefScale[beliefIndex] += squares[currentIndex].beliefStrength[beliefIndex] / numSurroundingSquares;
+            }
         }
     }
 
     // Define and find average player values
-    float4 playerColor = float4(0, 0, 0, 1.0);
-    float beliefScale[] = {0, 0};
+    float playerBeliefScale[] = {0, 0};
     float2 position = square.position;
     uint beliefIndex = 0;
 
@@ -110,41 +113,21 @@ void BackgroundUpdate (uint3 id : SV_DispatchThreadID)
         float distance = sqrt(distanceVector[0] * distanceVector[0] + distanceVector[1] * distanceVector[1]);
         float currentWeight = clamp(0.5f - 0.5f * distance * distance, 0, 1);
         
-        for (beliefIndex = 0; beliefIndex < beliefScale.Length; beliefIndex++)
+        for (beliefIndex = 0; beliefIndex < playerBeliefScale.Length; beliefIndex++)
         {
-            beliefScale[beliefIndex] += currentWeight * currentPlayer.beliefStrength[beliefIndex];
+            playerBeliefScale[beliefIndex] += currentWeight * currentPlayer.beliefStrength[beliefIndex];
         }
-    }
-
-    // Scale the beliefScale
-    float totalBeliefScale = 0;
-    for (beliefIndex = 0; beliefIndex < beliefScale.Length; beliefIndex++)
-    {
-        totalBeliefScale += beliefScale[beliefIndex];
-    }
-
-    for (beliefIndex = 0; beliefIndex < beliefScale.Length; beliefIndex++)
-    {
-        if (totalBeliefScale < 1)
-        {
-            playerColor += beliefs[beliefIndex].color * beliefScale[beliefIndex];
-        }
-        else
-        {
-            playerColor += beliefs[beliefIndex].color * (beliefScale[beliefIndex] / totalBeliefScale);
-        }
-        
-    }
-
-    if (totalBeliefScale < 1)
-    {
-        playerColor += square.color * (1 - totalBeliefScale);
     }
 
     // Merge the two colors
-    newColor = neighbourColor * neighbourWeighting + playerColor * (1 - neighbourWeighting);
+    for (beliefIndex = 0; beliefIndex < playerBeliefScale.Length; beliefIndex++)
+    {
+        newBeliefScale[beliefIndex] = neighbourBeliefScale[beliefIndex] * neighbourWeighting + playerBeliefScale[beliefIndex] * (1 - neighbourWeighting);
+    }
     
-    square.color = newColor;
+    for (beliefIndex = 0; beliefIndex < playerBeliefScale.Length; beliefIndex++)
+    {
+        square.beliefStrength[beliefIndex] = newBeliefScale[beliefIndex];
+    }
     squares[id.x] = square;
 }
-

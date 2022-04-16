@@ -18,6 +18,6 @@ public class GameManager : MonoBehaviour
 
     private void Start()
     {
-        playerManager.CreatePlayers();
+        playerManager.Create();
     }
 }

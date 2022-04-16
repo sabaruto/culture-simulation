@@ -239,7 +239,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   beliefColors:
   - {r: 0.19824673, g: 0.764151, b: 0.61448324, a: 1}
-  - {r: 0.3584906, g: 0.2945111, b: 0.25533998, a: 1}
+  - {r: 0.9433962, g: 0.4696443, b: 0.17354932, a: 1}
 --- !u!4 &2101243281
 Transform:
   m_ObjectHideFlags: 0
@@ -285,6 +285,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1a8c00414a4c1744ab9ba3fe4488a22c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  personObject: {fileID: 2633714743010374468, guid: 5f1d4f567636ef04b8eef4583eb5ff77, type: 3}
+  obj: {fileID: 2633714743010374468, guid: 5f1d4f567636ef04b8eef4583eb5ff77, type: 3}
   numberOfPlayers: 10
   personSize: 8

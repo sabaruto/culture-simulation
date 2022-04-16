@@ -2,13 +2,7 @@ using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using UnityEngine;
 
-public struct Square
-{
-    public Vector2 position;
-    public Color color;
-}
-
-public class BackgroundManager : MonoBehaviour
+public class BackgroundManager : BelieverManager
 {
     [SerializeField] private ComputeShader backgroundShader;
     [SerializeField] private Sprite squareSprite;
@@ -22,8 +16,6 @@ public class BackgroundManager : MonoBehaviour
     public float Scale => scale;
 
     private float updateTimer;
-    private Square[] squares;
-    private GameObject[] squareObjects;
     private GameManager gameManager;
     private PlayerManager playerManager;
     public void Awake()
@@ -31,11 +23,11 @@ public class BackgroundManager : MonoBehaviour
         gameManager = GetComponent<GameManager>();
         playerManager = GetComponent<PlayerManager>();
         updateTimer = 0;
+        Initialize(pixelWidth * pixelHeight);
     }
     public void Start()
     {
-        CreateSquares();
-        // UpdateSquares();
+        Create();
     }
 
     public void FixedUpdate()
@@ -49,11 +41,8 @@ public class BackgroundManager : MonoBehaviour
         }
     }
 
-    private void CreateSquares()
+    public override void Create()
     {
-        squares = new Square[pixelWidth * pixelHeight];
-        squareObjects = new GameObject[pixelWidth * pixelHeight];
-
         for (int x = 0; x < pixelWidth; x++)
         {
             for (int y = 0; y < pixelHeight; y++)
@@ -62,39 +51,42 @@ public class BackgroundManager : MonoBehaviour
 
                 GameObject currentObject = new GameObject("Cube - x:" + x + " y:" + y, typeof(SpriteRenderer));
                 SpriteRenderer currentSpriteSpr = currentObject.GetComponent<SpriteRenderer>();
-                Square currentSquare = new Square();
+                Dictionary<Belief, float> currentBeliefs = new Dictionary<Belief, float>();
 
                 currentSpriteSpr.sprite = squareSprite;
                 currentSpriteSpr.sortingLayerName = "Background";
 
                 currentObject.transform.localScale = new Vector2(scale, scale);
 
-                squareObjects[currentIndex] = currentObject;
+                memberObjects[currentIndex] = currentObject;
 
-                currentSquare.position = PixelToPosition(x, y);
-                currentSquare.color = Random.ColorHSV();
+                foreach (Belief belief in Beliefs.AllBeliefs) { currentBeliefs.Add(belief, Random.value); }
 
+                Member currentSquare = new Member{position = PixelToPosition(x, y), beliefScales = currentBeliefs};
                 
-                squares[currentIndex] = currentSquare;
-                UpdateObject(currentIndex);
+                members[currentIndex] = currentSquare;
+                memberObjects[currentIndex] = currentObject;
+                memberRenderers[currentIndex] = currentObject.GetComponent<SpriteRenderer>();
+                bufferMembers[currentIndex] = ConvertMember(currentSquare);
             }
         }
+        UpdateColors();
     }
 
     private void UpdateSquares()
     {
-        int squareSize = Marshal.SizeOf(typeof(Square));
-        int playerSize = Marshal.SizeOf(typeof(BufferPlayer));
+        int squareSize = Marshal.SizeOf(typeof(BufferMember));
+        int playerSize = Marshal.SizeOf(typeof(PlayerManager.BufferMember));
         int beliefSize = Marshal.SizeOf(typeof(Belief));
 
-        BufferPlayer[] bufferPlayers = playerManager.GetBufferPlayers();
+        PlayerManager.BufferMember[] bufferPlayers = playerManager.GetBufferMembers();
 
         int kernel = backgroundShader.FindKernel("BackgroundUpdate");
-        ComputeBuffer squareBuffer = new ComputeBuffer(squares.Length, squareSize);
+        ComputeBuffer squareBuffer = new ComputeBuffer(bufferMembers.Length, squareSize);
         ComputeBuffer playerBuffer = new ComputeBuffer(bufferPlayers.Length, playerSize);
         ComputeBuffer beliefBuffer = new ComputeBuffer(Beliefs.Count, beliefSize);
 
-        squareBuffer.SetData(squares);
+        squareBuffer.SetData(bufferMembers);
         playerBuffer.SetData(bufferPlayers);
         beliefBuffer.SetData(Beliefs.AllBeliefs);
 
@@ -104,30 +96,14 @@ public class BackgroundManager : MonoBehaviour
         backgroundShader.SetInt("width", pixelWidth);
         backgroundShader.SetInt("height", pixelHeight);
         backgroundShader.SetFloat("neighbourWeighting", neighourWeighting);
-        backgroundShader.Dispatch(kernel, squares.Length / 32, 1, 1);
+        backgroundShader.Dispatch(kernel, bufferMembers.Length / 32, 1, 1);
 
-        squareBuffer.GetData(squares);
+        squareBuffer.GetData(bufferMembers);
+        UpdateMembers();
         
         squareBuffer.Dispose();
         playerBuffer.Dispose();
         beliefBuffer.Dispose();
-
-        for (int x = 0; x < pixelWidth; x++)
-        for (int y = 0; y < pixelHeight; y++)
-        {
-            UpdateObject(x * pixelHeight + y);
-        }
-    }
-
-    private void UpdateObject(int index)
-    {
-        GameObject currentObject = squareObjects[index];
-        Square currentSquare = squares[index];
-
-        currentObject.transform.position = currentSquare.position;
-        currentObject.GetComponent<SpriteRenderer>().color = currentSquare.color;
-
-        squareObjects[index] = currentObject;
     }
 
     public Vector2 PixelToPosition(int pixelX, int pixelY)

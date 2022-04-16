@@ -2,42 +2,19 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public struct Player
+public class PlayerManager : BelieverManager
 {
-    public Vector2 position;
-    public Dictionary<Belief, float> beliefScales;
-}
-
-public struct BufferPlayer
-{
-    public Vector2 position;
-    public Vector2 beliefScales;
-}
-
-public class PlayerManager : MonoBehaviour
-{
-    [SerializeField] private GameObject personObject;
     [SerializeField] private int numberOfPlayers;
     [SerializeField] private int personSize;
-    private Player[] players;
-    private GameObject[] playerObjects;
-    private SpriteRenderer[] playerRenderers;
     private BackgroundManager bgManager;
 
     public void Awake()
     {
         bgManager = FindObjectOfType<BackgroundManager>();
-        players = new Player[numberOfPlayers];
-        playerObjects = new GameObject[numberOfPlayers];
-        playerRenderers = new SpriteRenderer[numberOfPlayers];
+        Initialize(numberOfPlayers);
     }
 
-    public void Update()
-    {
-        UpdateObjectPlayerColor();
-    }
-
-    public void CreatePlayers()
+    public override void Create()
     {
         int pixelWidth = bgManager.PixelWidth;
         int pixelHeight = bgManager.PixelHeight;
@@ -58,68 +35,16 @@ public class PlayerManager : MonoBehaviour
             foreach (Belief belief in Beliefs.AllBeliefs) { currentBeliefs.Add(belief, Random.value); }
 
             GameObject currentObject = Instantiate(
-                personObject,
+                obj,
                 position,
                 Quaternion.identity
             );
-            Player currentPlayer = new Player{position = position, beliefScales = currentBeliefs};
+            Member currentPlayer = new Member{position = position, beliefScales = currentBeliefs};
 
-            players[playerIndex] = currentPlayer;
-            playerObjects[playerIndex] = currentObject;
-            playerRenderers[playerIndex] = currentObject.GetComponent<SpriteRenderer>();
+            members[playerIndex] = currentPlayer;
+            memberObjects[playerIndex] = currentObject;
+            memberRenderers[playerIndex] = currentObject.GetComponent<SpriteRenderer>();
+            bufferMembers[playerIndex] = ConvertMember(currentPlayer);
         }
-    }
-
-    public void UpdateObjectPlayerColor()
-    {
-        for (int playerIndex = 0; playerIndex < numberOfPlayers; playerIndex++)
-        {
-            Player currentPlayer = players[playerIndex];
-            Color averagePlayerColor = GetAveragePlayerColor(currentPlayer);
-            playerRenderers[playerIndex].color = averagePlayerColor;
-        }
-    }
-
-    private Color GetAveragePlayerColor(Player player)
-    {
-        Color newColor = Color.black;
-        int beliefNumber = player.beliefScales.Count;
-        
-        float totalScale = 0;
-        foreach (float value in player.beliefScales.Values) { totalScale += value; }
-
-        foreach (Belief belief in Beliefs.AllBeliefs)
-        {
-            newColor += belief.color * player.beliefScales[belief] / totalScale;
-        }
-
-        return newColor;
-    }
-
-    public BufferPlayer[] GetBufferPlayers()
-    {
-        BufferPlayer[] bufferPlayers = new BufferPlayer[players.Length];
-        for (int playerIndex = 0; playerIndex < players.Length; playerIndex++)
-        {
-            bufferPlayers[playerIndex] = ConvertPlayer(players[playerIndex]);
-        }
-
-        return bufferPlayers;
-    }
-
-    public BufferPlayer ConvertPlayer(Player player)
-    {
-        Vector2 beliefScales = new Vector2();
-        for (int beliefIndex = 0; beliefIndex < Beliefs.Count; beliefIndex++)
-        {
-            Belief currentBelief = Beliefs.GetBelief(beliefIndex);
-            beliefScales[beliefIndex] = player.beliefScales[currentBelief];
-        }
-
-        return new BufferPlayer
-        {
-            position = player.position, 
-            beliefScales = beliefScales
-        };
     }
 }

@@ -16,12 +16,19 @@ public abstract class BelieverManager : MonoBehaviour
         public Vector2 position;
         public Vector2 beliefScales;
     }
-    [SerializeField] private GameObject obj;
-    private Member[] members;
-    private BufferMember[] bufferMembers;
-    private GameObject[] memberObjects;
-    private SpriteRenderer[] memberRenderers;
-
+    [SerializeField] protected GameObject obj;
+    protected Member[] members;
+    protected BufferMember[] bufferMembers;
+    protected GameObject[] memberObjects;
+    protected SpriteRenderer[] memberRenderers;
+    protected void Initialize(int memberNumber)
+    {
+        members = new Member[memberNumber];
+        memberObjects = new GameObject[memberNumber];
+        memberRenderers = new SpriteRenderer[memberNumber];
+        bufferMembers = new BufferMember[memberNumber];
+    }
+    
     public abstract void Create();
     public void Update()
     {
@@ -32,11 +39,11 @@ public abstract class BelieverManager : MonoBehaviour
         for (int memberIndex = 0; memberIndex < members.Length; memberIndex++)
         {
             Member currentMember = members[memberIndex];
-            Color averagePlayerColor = GetAveragePlayerColor(currentMember);
+            Color averagePlayerColor = GetAverageMemberColor(currentMember);
             memberRenderers[memberIndex].color = averagePlayerColor;
         }
     }
-    private Color GetAveragePlayerColor(Member member)
+    private Color GetAverageMemberColor(Member member)
     {
         Color newColor = Color.black;
         int beliefNumber = member.beliefScales.Count;
@@ -69,5 +76,24 @@ public abstract class BelieverManager : MonoBehaviour
             position = member.position, 
             beliefScales = beliefScales
         };
+    }
+
+    // Updates the members from the bufferMember values
+    protected void UpdateMembers()
+    {
+        for (int memberIndex = 0; memberIndex < members.Length; memberIndex++)
+        {
+            Member currentMember = members[memberIndex];
+            BufferMember currentBufferMember = bufferMembers[memberIndex];
+            currentMember.position = currentBufferMember.position;
+
+            for (int beliefIndex = 0; beliefIndex < Beliefs.Count; beliefIndex++)
+            {
+                Belief belief = Beliefs.GetBelief(beliefIndex);
+                currentMember.beliefScales[belief] = currentBufferMember.beliefScales[beliefIndex];
+            }
+
+            members[memberIndex] = currentMember;
+        }
     }
 }
