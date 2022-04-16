@@ -123,52 +123,6 @@ NavMeshSettings:
     debug:
       m_Flags: 0
   m_NavMeshData: {fileID: 0}
---- !u!1 &508349631
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 508349633}
-  - component: {fileID: 508349632}
-  m_Layer: 0
-  m_Name: ComputeShaderTest
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!114 &508349632
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 508349631}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 73547e3579e3a8443b524c97eab3e479, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  computeShader: {fileID: 7200000, guid: f57fe1caf4ed8c745997e2853bf05844, type: 3}
-  renderTexture: {fileID: 8400000, guid: 9541109a6f8d66b42b640da9cf2f20ed, type: 2}
-  initialTexture2d: {fileID: 2800000, guid: 18e8e8704afa05443adb1cf8d9c9ab9a, type: 3}
---- !u!4 &508349633
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 508349631}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_RootOrder: 1
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &519420028
 GameObject:
   m_ObjectHideFlags: 0
@@ -284,8 +238,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   beliefColors:
-  - {r: 0.19824673, g: 0.764151, b: 0.61448324, a: 0}
-  - {r: 0.3584906, g: 0.2945111, b: 0.25533998, a: 0}
+  - {r: 0.19824673, g: 0.764151, b: 0.61448324, a: 1}
+  - {r: 0.3584906, g: 0.2945111, b: 0.25533998, a: 1}
 --- !u!4 &2101243281
 Transform:
   m_ObjectHideFlags: 0
@@ -298,7 +252,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
-  m_RootOrder: 2
+  m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &2101243282
 MonoBehaviour:
@@ -314,8 +268,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   backgroundShader: {fileID: 7200000, guid: 8458ff921e1c4504db227fae36bf3725, type: 3}
   squareSprite: {fileID: 7482667652216324306, guid: 312812a3e707e3c4e955744193cbc5fc, type: 3}
-  squareUpdateRate: 1
-  neighourWeighting: 0.01
+  squareUpdateRate: 4
+  neighourWeighting: 0.5
   scale: 0.1
   pixelWidth: 160
   pixelHeight: 90
@@ -332,5 +286,5 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   personObject: {fileID: 2633714743010374468, guid: 5f1d4f567636ef04b8eef4583eb5ff77, type: 3}
-  numberOfPlayers: 5
+  numberOfPlayers: 10
   personSize: 8

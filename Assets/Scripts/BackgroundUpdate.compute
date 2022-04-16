@@ -1,5 +1,5 @@
 // Each #kernel tells which function to compile; you can have many kernels
-#pragma kernel CSMain
+#pragma kernel BackgroundUpdate
 
 struct Square
 {
@@ -15,8 +15,8 @@ struct Belief
 struct Player
 {
     // TODO Create variable number of beliefs
-    float2 beliefStrength;
     float2 position;
+    float2 beliefStrength;
 };
 
 int width;
@@ -28,7 +28,7 @@ RWStructuredBuffer<Player> players;
 RWStructuredBuffer<Belief> beliefs;
 
 [numthreads(32,1,1)]
-void CSMain (uint3 id : SV_DispatchThreadID)
+void BackgroundUpdate (uint3 id : SV_DispatchThreadID)
 {
     float x = id.x / height;
     float y = id.x - x * height;
@@ -108,7 +108,7 @@ void CSMain (uint3 id : SV_DispatchThreadID)
         Player currentPlayer = players[playerIndex];
         float2 distanceVector = position - currentPlayer.position;
         float distance = sqrt(distanceVector[0] * distanceVector[0] + distanceVector[1] * distanceVector[1]);
-        float currentWeight = 1.0f / (distance + 1);
+        float currentWeight = clamp(0.5f - 0.5f * distance * distance, 0, 1);
         
         for (beliefIndex = 0; beliefIndex < beliefScale.Length; beliefIndex++)
         {
@@ -125,12 +125,20 @@ void CSMain (uint3 id : SV_DispatchThreadID)
 
     for (beliefIndex = 0; beliefIndex < beliefScale.Length; beliefIndex++)
     {
-        if (beliefScale[beliefIndex] / totalBeliefScale > 1)
+        if (totalBeliefScale < 1)
         {
-            playerColor = float4(0, 0, 0, 1.0);
-            break;
+            playerColor += beliefs[beliefIndex].color * beliefScale[beliefIndex];
         }
-        playerColor += beliefs[beliefIndex].color * (beliefScale[beliefIndex] / totalBeliefScale);
+        else
+        {
+            playerColor += beliefs[beliefIndex].color * (beliefScale[beliefIndex] / totalBeliefScale);
+        }
+        
+    }
+
+    if (totalBeliefScale < 1)
+    {
+        playerColor += square.color * (1 - totalBeliefScale);
     }
 
     // Merge the two colors

@@ -35,7 +35,7 @@ public class BackgroundManager : MonoBehaviour
     public void Start()
     {
         CreateSquares();
-        UpdateSquares();
+        // UpdateSquares();
     }
 
     public void FixedUpdate()
@@ -89,7 +89,7 @@ public class BackgroundManager : MonoBehaviour
 
         BufferPlayer[] bufferPlayers = playerManager.GetBufferPlayers();
 
-        int kernel = backgroundShader.FindKernel("CSMain");
+        int kernel = backgroundShader.FindKernel("BackgroundUpdate");
         ComputeBuffer squareBuffer = new ComputeBuffer(squares.Length, squareSize);
         ComputeBuffer playerBuffer = new ComputeBuffer(bufferPlayers.Length, playerSize);
         ComputeBuffer beliefBuffer = new ComputeBuffer(Beliefs.Count, beliefSize);
