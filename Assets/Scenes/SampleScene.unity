@@ -269,11 +269,12 @@ MonoBehaviour:
   obj: {fileID: 0}
   backgroundShader: {fileID: 7200000, guid: 8458ff921e1c4504db227fae36bf3725, type: 3}
   squareSprite: {fileID: 7482667652216324306, guid: 312812a3e707e3c4e955744193cbc5fc, type: 3}
-  squareUpdateRate: 10
-  neighourWeighting: 0.9
-  scale: 0.1
-  pixelWidth: 160
-  pixelHeight: 90
+  squareUpdateRate: 400
+  neighourWeighting: 1
+  squareWeighting: 0
+  scale: 0.2
+  pixelWidth: 80
+  pixelHeight: 45
 --- !u!114 &2101243283
 MonoBehaviour:
   m_ObjectHideFlags: 0

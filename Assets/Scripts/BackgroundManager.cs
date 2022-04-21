@@ -1,4 +1,3 @@
-using System.Diagnostics;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using UnityEngine;
@@ -8,7 +7,7 @@ public class BackgroundManager : BelieverManager
     [SerializeField] private ComputeShader backgroundShader;
     [SerializeField] private Sprite squareSprite;
     [SerializeField] private float squareUpdateRate;
-    [SerializeField] private float neighourWeighting;
+    [SerializeField] private float neighourWeighting, squareWeighting;
     [SerializeField] private float scale;
     [SerializeField] private int pixelWidth, pixelHeight;
 
@@ -23,7 +22,7 @@ public class BackgroundManager : BelieverManager
     {
         gameManager = GetComponent<GameManager>();
         playerManager = GetComponent<PlayerManager>();
-        updateTimer = 0;
+        updateTimer = 1 / squareUpdateRate;
         Initialize(pixelWidth * pixelHeight);
     }
     public void Start()
@@ -52,7 +51,7 @@ public class BackgroundManager : BelieverManager
 
                 GameObject currentObject = new GameObject("Cube - x:" + x + " y:" + y, typeof(SpriteRenderer));
                 SpriteRenderer currentSpriteSpr = currentObject.GetComponent<SpriteRenderer>();
-                Dictionary<Belief, float> currentBeliefs = new Dictionary<Belief, float>();
+                Vector2 currentBeliefs = new Vector2(Random.value, Random.value);
 
                 currentSpriteSpr.sprite = squareSprite;
                 currentSpriteSpr.sortingLayerName = "Background";
@@ -62,33 +61,33 @@ public class BackgroundManager : BelieverManager
 
                 memberObjects[currentIndex] = currentObject;
 
-                foreach (Belief belief in Beliefs.AllBeliefs) { currentBeliefs.Add(belief, Random.value); }
+                Member currentSquare = new Member
+                {
+                    position = PixelToPosition(x, y), 
+                    beliefScales = currentBeliefs
+                };
 
-                Member currentSquare = new Member{position = PixelToPosition(x, y), beliefScales = currentBeliefs};
-                
-                members[currentIndex] = currentSquare;
                 memberObjects[currentIndex] = currentObject;
                 memberRenderers[currentIndex] = currentObject.GetComponent<SpriteRenderer>();
-                bufferMembers[currentIndex] = ConvertMember(currentSquare);
+                members[currentIndex] = currentSquare;
             }
         }
-        UpdateColors();
     }
 
     private void UpdateSquares()
     {
-        int squareSize = Marshal.SizeOf(typeof(BufferMember));
-        int playerSize = Marshal.SizeOf(typeof(PlayerManager.BufferMember));
+        int squareSize = Marshal.SizeOf(typeof(Member));
+        int playerSize = Marshal.SizeOf(typeof(PlayerManager.Member));
         int beliefSize = Marshal.SizeOf(typeof(Belief));
 
-        PlayerManager.BufferMember[] bufferPlayers = playerManager.GetBufferMembers();
+        PlayerManager.Member[] bufferPlayers = playerManager.GetBufferMembers();
 
         int kernel = backgroundShader.FindKernel("BackgroundUpdate");
-        ComputeBuffer squareBuffer = new ComputeBuffer(bufferMembers.Length, squareSize);
+        ComputeBuffer squareBuffer = new ComputeBuffer(members.Length, squareSize);
         ComputeBuffer playerBuffer = new ComputeBuffer(bufferPlayers.Length, playerSize);
         ComputeBuffer beliefBuffer = new ComputeBuffer(Beliefs.Count, beliefSize);
 
-        squareBuffer.SetData(bufferMembers);
+        squareBuffer.SetData(members);
         playerBuffer.SetData(bufferPlayers);
         beliefBuffer.SetData(Beliefs.AllBeliefs);
 
@@ -98,10 +97,10 @@ public class BackgroundManager : BelieverManager
         backgroundShader.SetInt("width", pixelWidth);
         backgroundShader.SetInt("height", pixelHeight);
         backgroundShader.SetFloat("neighbourWeighting", neighourWeighting);
-        backgroundShader.Dispatch(kernel, bufferMembers.Length / 32, 1, 1);
+        backgroundShader.SetFloat("squareWeighting", squareWeighting);
+        backgroundShader.Dispatch(kernel, members.Length / 32, 1, 1);
 
-        squareBuffer.GetData(bufferMembers);
-        UpdateMembers();
+        squareBuffer.GetData(members);
         
         squareBuffer.Dispose();
         playerBuffer.Dispose();

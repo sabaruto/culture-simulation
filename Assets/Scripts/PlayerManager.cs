@@ -31,8 +31,7 @@ public class PlayerManager : BelieverManager
                 MathFunctions.Snap(Random.Range(minPosition.y, maxPosition.y), scale)
             );
 
-            Dictionary<Belief, float> currentBeliefs = new Dictionary<Belief, float>();
-            foreach (Belief belief in Beliefs.AllBeliefs) { currentBeliefs.Add(belief, Random.value); }
+            Vector2 currentBeliefs = new Vector2(Random.value, Random.value);
 
             GameObject currentObject = Instantiate(
                 obj,
@@ -41,10 +40,9 @@ public class PlayerManager : BelieverManager
             );
             Member currentPlayer = new Member{position = position, beliefScales = currentBeliefs};
 
-            members[playerIndex] = currentPlayer;
             memberObjects[playerIndex] = currentObject;
             memberRenderers[playerIndex] = currentObject.GetComponent<SpriteRenderer>();
-            bufferMembers[playerIndex] = ConvertMember(currentPlayer);
+            members[playerIndex] = currentPlayer;
         }
     }
 }

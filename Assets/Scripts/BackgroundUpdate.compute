@@ -22,6 +22,7 @@ struct Player
 int width;
 int height;
 float neighbourWeighting;
+float squareWeighting;
 
 RWStructuredBuffer<Square> squares;
 RWStructuredBuffer<Player> players;
@@ -30,13 +31,15 @@ RWStructuredBuffer<Belief> beliefs;
 [numthreads(32,1,1)]
 void BackgroundUpdate (uint3 id : SV_DispatchThreadID)
 {
-    //TODO Fix Update
-    float x = id.x / height;
-    float y = id.x - x * height;
+    int x = id.x / height;
+    int y = id.x - x * height;
     float newBeliefScale[] = {0, 0};
     Square square = squares[id.x];
 
-    // Define and find average of neighbour values
+    uint beliefIndex = 0;
+
+    // Define and find average of neighbour and current values
+    float squareBeliefScale[] = {0, 0};
     float neighbourBeliefScale[] = {0, 0};
     float surroundingSquareIndexes[] = 
     {
@@ -94,17 +97,22 @@ void BackgroundUpdate (uint3 id : SV_DispatchThreadID)
 
         if (accessableSquares[indexIndex] == 1)
         {
-            for (uint beliefIndex = 0; beliefIndex < newBeliefScale.Length; beliefIndex++)
+            for (beliefIndex = 0; beliefIndex < newBeliefScale.Length; beliefIndex++)
             {
                 neighbourBeliefScale[beliefIndex] += squares[currentIndex].beliefStrength[beliefIndex] / numSurroundingSquares;
             }
         }
     }
 
+    for (beliefIndex = 0; beliefIndex < newBeliefScale.Length; beliefIndex++)
+    {
+        squareBeliefScale[beliefIndex] = square.beliefStrength[beliefIndex] * squareWeighting + neighbourBeliefScale[beliefIndex] * (1 - squareWeighting);
+    }
+
     // Define and find average player values
     float playerBeliefScale[] = {0, 0};
     float2 position = square.position;
-    uint beliefIndex = 0;
+    
 
     for (uint playerIndex = 0; playerIndex < players.Length; playerIndex++)
     {
@@ -122,7 +130,7 @@ void BackgroundUpdate (uint3 id : SV_DispatchThreadID)
     // Merge the two colors
     for (beliefIndex = 0; beliefIndex < playerBeliefScale.Length; beliefIndex++)
     {
-        newBeliefScale[beliefIndex] = neighbourBeliefScale[beliefIndex] * neighbourWeighting + playerBeliefScale[beliefIndex] * (1 - neighbourWeighting);
+        newBeliefScale[beliefIndex] = squareBeliefScale[beliefIndex] * neighbourWeighting + playerBeliefScale[beliefIndex] * (1 - neighbourWeighting);
     }
     
     for (beliefIndex = 0; beliefIndex < playerBeliefScale.Length; beliefIndex++)
