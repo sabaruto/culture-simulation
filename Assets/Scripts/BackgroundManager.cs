@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using UnityEngine;
@@ -56,6 +57,7 @@ public class BackgroundManager : BelieverManager
                 currentSpriteSpr.sprite = squareSprite;
                 currentSpriteSpr.sortingLayerName = "Background";
 
+                currentObject.transform.position = PixelToPosition(x, y);
                 currentObject.transform.localScale = new Vector2(scale, scale);
 
                 memberObjects[currentIndex] = currentObject;

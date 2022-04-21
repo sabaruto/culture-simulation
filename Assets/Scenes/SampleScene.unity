@@ -266,10 +266,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 57c932b06e604304abb0e0b599e36d9f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  obj: {fileID: 0}
   backgroundShader: {fileID: 7200000, guid: 8458ff921e1c4504db227fae36bf3725, type: 3}
   squareSprite: {fileID: 7482667652216324306, guid: 312812a3e707e3c4e955744193cbc5fc, type: 3}
-  squareUpdateRate: 4
-  neighourWeighting: 0.5
+  squareUpdateRate: 10
+  neighourWeighting: 0.9
   scale: 0.1
   pixelWidth: 160
   pixelHeight: 90

@@ -55,7 +55,7 @@ public abstract class BelieverManager : MonoBehaviour
         {
             newColor += belief.color * member.beliefScales[belief] / totalScale;
         }
-
+        
         return newColor;
     }
     public BufferMember[] GetBufferMembers()
