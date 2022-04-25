@@ -8,11 +8,15 @@ public class PlayerManager : BelieverManager
     [SerializeField] private int numberOfPlayers;
     [SerializeField] private int personSize;
     private BackgroundManager bgManager;
+    private GameObject[] memberObjects;
 
     public void Awake()
     {
         bgManager = FindObjectOfType<BackgroundManager>();
-        Initialize(numberOfPlayers);
+
+        memberObjects = new GameObject[numberOfPlayers];
+        memberRenderers = new SpriteRenderer[numberOfPlayers];
+        members = new Member[numberOfPlayers];
     }
 
     public override void Create()

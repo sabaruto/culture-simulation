@@ -5,11 +5,11 @@ using UnityEngine;
 public class BackgroundManager : BelieverManager
 {
     [SerializeField] private ComputeShader backgroundShader;
-    [SerializeField] private Sprite squareSprite;
     [SerializeField] private float squareUpdateRate;
     [SerializeField] private float neighourWeighting, squareWeighting;
     [SerializeField] private float scale;
     [SerializeField] private int pixelWidth, pixelHeight;
+    [SerializeField] private RenderTexture renderTexture;
 
     public int PixelWidth => pixelWidth;
     public int PixelHeight => pixelHeight;
@@ -22,8 +22,13 @@ public class BackgroundManager : BelieverManager
     {
         gameManager = GetComponent<GameManager>();
         playerManager = GetComponent<PlayerManager>();
+
         updateTimer = 0;
-        Initialize(pixelWidth * pixelHeight);
+
+        renderTexture = new RenderTexture(pixelWidth, pixelHeight, 24);
+        renderTexture.enableRandomWrite = true;
+
+        members = new Member[pixelWidth * pixelHeight];
     }
     public void Start()
     {
@@ -41,6 +46,11 @@ public class BackgroundManager : BelieverManager
         }
     }
 
+    public override void UpdateColors()
+    {
+        return;
+    }
+
     public override void Create()
     {
         for (int x = 0; x < pixelWidth; x++)
@@ -48,27 +58,13 @@ public class BackgroundManager : BelieverManager
             for (int y = 0; y < pixelHeight; y++)
             {
                 int currentIndex = x * pixelHeight + y;
-
-                GameObject currentObject = new GameObject("Cube - x:" + x + " y:" + y, typeof(SpriteRenderer));
-                SpriteRenderer currentSpriteSpr = currentObject.GetComponent<SpriteRenderer>();
                 Vector2 currentBeliefs = new Vector2(Random.value, Random.value);
-
-                currentSpriteSpr.sprite = squareSprite;
-                currentSpriteSpr.sortingLayerName = "Background";
-
-                currentObject.transform.position = PixelToPosition(x, y);
-                currentObject.transform.localScale = new Vector2(scale, scale);
-
-                memberObjects[currentIndex] = currentObject;
 
                 Member currentSquare = new Member
                 {
                     position = PixelToPosition(x, y), 
                     beliefScales = currentBeliefs
                 };
-
-                memberObjects[currentIndex] = currentObject;
-                memberRenderers[currentIndex] = currentObject.GetComponent<SpriteRenderer>();
                 members[currentIndex] = currentSquare;
             }
         }
@@ -99,8 +95,10 @@ public class BackgroundManager : BelieverManager
         backgroundShader.SetBuffer(kernel, "beliefs", beliefBuffer);
         backgroundShader.SetInt("width", pixelWidth);
         backgroundShader.SetInt("height", pixelHeight);
+        backgroundShader.SetFloat("scale", scale);
         backgroundShader.SetFloat("neighbourWeighting", neighourWeighting);
         backgroundShader.SetFloat("squareWeighting", squareWeighting);
+        backgroundShader.SetTexture(kernel, "result", renderTexture);
         backgroundShader.Dispatch(kernel, members.Length / 32, 1, 1);
 
         squareBuffer.GetData(members);

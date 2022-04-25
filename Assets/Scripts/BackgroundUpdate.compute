@@ -3,6 +3,7 @@
 
 struct Square
 {
+    // TODO Add pixel position
     float2 position;
     float2 beliefStrength;
 };
@@ -21,6 +22,7 @@ struct Player
 
 int width;
 int height;
+float scale;
 float neighbourWeighting;
 float squareWeighting;
 
@@ -28,11 +30,12 @@ RWStructuredBuffer<Square> squares;
 RWStructuredBuffer<Square> workingSquares;
 RWStructuredBuffer<Player> players;
 RWStructuredBuffer<Belief> beliefs;
+RWTexture2D<float4> result;
 
 
 int2 PositionToPixel(float2 pos)
 {
-    return int2(0.5 * (width - 1) + pos[0], 0.5 * (height - 1) + pos[1]);
+    return int2(0.5 * (width - 1) + pos[0] / scale, 0.5 * (height - 1) + pos[1] / scale);
 }
 
 [numthreads(32,1,1)]
@@ -152,6 +155,9 @@ void BackgroundUpdate (uint3 id : SV_DispatchThreadID)
     for (beliefIndex = 0; beliefIndex < playerBeliefScale.Length; beliefIndex++)
     {
         square.beliefStrength[beliefIndex] = newBeliefScale[beliefIndex] / totalBeliefStrength;
+
+        // Update the render color for the square
+        result[pixelPosition] += beliefs[beliefIndex].color * square.beliefStrength[beliefIndex] / 255;
     }
 
     squares[id.x] = square;

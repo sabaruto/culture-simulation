@@ -11,21 +11,14 @@ public abstract class BelieverManager : MonoBehaviour
         public Vector2 beliefScales;
     }
     protected Member[] members;
-    protected GameObject[] memberObjects;
     protected SpriteRenderer[] memberRenderers;
-    protected void Initialize(int memberNumber)
-    {
-        memberObjects = new GameObject[memberNumber];
-        memberRenderers = new SpriteRenderer[memberNumber];
-        members = new Member[memberNumber];
-    }
     
     public abstract void Create();
     public void Update()
     {
         UpdateColors();
     }
-    public void UpdateColors()
+    public virtual void UpdateColors()
     {
         for (int memberIndex = 0; memberIndex < members.Length; memberIndex++)
         {
