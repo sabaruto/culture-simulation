@@ -22,7 +22,7 @@ public class BackgroundManager : BelieverManager
     {
         gameManager = GetComponent<GameManager>();
         playerManager = GetComponent<PlayerManager>();
-        updateTimer = 1 / squareUpdateRate;
+        updateTimer = 0;
         Initialize(pixelWidth * pixelHeight);
     }
     public void Start()
@@ -84,14 +84,17 @@ public class BackgroundManager : BelieverManager
 
         int kernel = backgroundShader.FindKernel("BackgroundUpdate");
         ComputeBuffer squareBuffer = new ComputeBuffer(members.Length, squareSize);
+        ComputeBuffer workingSquareBuffer = new ComputeBuffer(members.Length, squareSize);
         ComputeBuffer playerBuffer = new ComputeBuffer(bufferPlayers.Length, playerSize);
         ComputeBuffer beliefBuffer = new ComputeBuffer(Beliefs.Count, beliefSize);
 
         squareBuffer.SetData(members);
+        workingSquareBuffer.SetData(members);
         playerBuffer.SetData(bufferPlayers);
         beliefBuffer.SetData(Beliefs.AllBeliefs);
 
         backgroundShader.SetBuffer(kernel, "squares", squareBuffer);
+        backgroundShader.SetBuffer(kernel, "workingSquares", workingSquareBuffer);
         backgroundShader.SetBuffer(kernel, "players", playerBuffer);
         backgroundShader.SetBuffer(kernel, "beliefs", beliefBuffer);
         backgroundShader.SetInt("width", pixelWidth);
@@ -103,6 +106,7 @@ public class BackgroundManager : BelieverManager
         squareBuffer.GetData(members);
         
         squareBuffer.Dispose();
+        workingSquareBuffer.Dispose();
         playerBuffer.Dispose();
         beliefBuffer.Dispose();
     }

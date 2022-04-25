@@ -266,15 +266,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 57c932b06e604304abb0e0b599e36d9f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  obj: {fileID: 0}
   backgroundShader: {fileID: 7200000, guid: 8458ff921e1c4504db227fae36bf3725, type: 3}
   squareSprite: {fileID: 7482667652216324306, guid: 312812a3e707e3c4e955744193cbc5fc, type: 3}
-  squareUpdateRate: 400
-  neighourWeighting: 1
-  squareWeighting: 0
-  scale: 0.2
-  pixelWidth: 80
-  pixelHeight: 45
+  squareUpdateRate: 900
+  neighourWeighting: 0.5
+  squareWeighting: 0.1
+  scale: 0.1
+  pixelWidth: 160
+  pixelHeight: 90
 --- !u!114 &2101243283
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -288,5 +287,5 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   obj: {fileID: 2633714743010374468, guid: 5f1d4f567636ef04b8eef4583eb5ff77, type: 3}
-  numberOfPlayers: 10
+  numberOfPlayers: 30
   personSize: 8

@@ -25,17 +25,25 @@ float neighbourWeighting;
 float squareWeighting;
 
 RWStructuredBuffer<Square> squares;
+RWStructuredBuffer<Square> workingSquares;
 RWStructuredBuffer<Player> players;
 RWStructuredBuffer<Belief> beliefs;
+
+
+int2 PositionToPixel(float2 pos)
+{
+    return int2(0.5 * (width - 1) + pos[0], 0.5 * (height - 1) + pos[1]);
+}
 
 [numthreads(32,1,1)]
 void BackgroundUpdate (uint3 id : SV_DispatchThreadID)
 {
-    int x = id.x / height;
-    int y = id.x - x * height;
-    float newBeliefScale[] = {0, 0};
     Square square = squares[id.x];
-
+    int2 pixelPosition = PositionToPixel(square.position);
+    int x = pixelPosition[0];
+    int y = pixelPosition[1];
+    float newBeliefScale[] = {0, 0};
+    
     uint beliefIndex = 0;
 
     // Define and find average of neighbour and current values
@@ -99,7 +107,7 @@ void BackgroundUpdate (uint3 id : SV_DispatchThreadID)
         {
             for (beliefIndex = 0; beliefIndex < newBeliefScale.Length; beliefIndex++)
             {
-                neighbourBeliefScale[beliefIndex] += squares[currentIndex].beliefStrength[beliefIndex] / numSurroundingSquares;
+                neighbourBeliefScale[beliefIndex] += workingSquares[currentIndex].beliefStrength[beliefIndex] / numSurroundingSquares;
             }
         }
     }
@@ -107,6 +115,11 @@ void BackgroundUpdate (uint3 id : SV_DispatchThreadID)
     for (beliefIndex = 0; beliefIndex < newBeliefScale.Length; beliefIndex++)
     {
         squareBeliefScale[beliefIndex] = square.beliefStrength[beliefIndex] * squareWeighting + neighbourBeliefScale[beliefIndex] * (1 - squareWeighting);
+
+        if (squareBeliefScale[beliefIndex] == 0)
+        {
+            squareBeliefScale[beliefIndex] = square.beliefStrength[beliefIndex];
+        }
     }
 
     // Define and find average player values
@@ -128,14 +141,18 @@ void BackgroundUpdate (uint3 id : SV_DispatchThreadID)
     }
 
     // Merge the two colors
+    float totalBeliefStrength = 0;
     for (beliefIndex = 0; beliefIndex < playerBeliefScale.Length; beliefIndex++)
     {
         newBeliefScale[beliefIndex] = squareBeliefScale[beliefIndex] * neighbourWeighting + playerBeliefScale[beliefIndex] * (1 - neighbourWeighting);
+
+        totalBeliefStrength += newBeliefScale[beliefIndex];
     }
     
     for (beliefIndex = 0; beliefIndex < playerBeliefScale.Length; beliefIndex++)
     {
-        square.beliefStrength[beliefIndex] = newBeliefScale[beliefIndex];
+        square.beliefStrength[beliefIndex] = newBeliefScale[beliefIndex] / totalBeliefStrength;
     }
+
     squares[id.x] = square;
 }

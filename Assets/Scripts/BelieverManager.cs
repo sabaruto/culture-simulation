@@ -10,7 +10,6 @@ public abstract class BelieverManager : MonoBehaviour
         public Vector2 position;
         public Vector2 beliefScales;
     }
-    [SerializeField] protected GameObject obj;
     protected Member[] members;
     protected GameObject[] memberObjects;
     protected SpriteRenderer[] memberRenderers;
@@ -46,10 +45,25 @@ public abstract class BelieverManager : MonoBehaviour
             totalScale += member.beliefScales[valueIndex]; 
         }
 
+        if (totalScale == 0)
+        {
+            return Color.red;
+        }
+
         for (int beliefIndex = 0; beliefIndex < beliefNumber; beliefIndex++) 
         {
             Belief currentBelief = Beliefs.GetBelief(beliefIndex);
             newColor += currentBelief.color * member.beliefScales[beliefIndex] / totalScale;
+        }
+
+        if (newColor[0] > 1 || newColor[1] > 1 || newColor[2] > 1)
+        {
+            newColor = Color.white;
+        }
+
+        if (newColor[0] < 0 || newColor[1] < 0 || newColor[2] < 0)
+        {
+            newColor = Color.black;
         }
         
         return newColor;

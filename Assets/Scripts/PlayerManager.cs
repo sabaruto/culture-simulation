@@ -4,6 +4,7 @@ using UnityEngine;
 
 public class PlayerManager : BelieverManager
 {
+    [SerializeField] protected GameObject obj;
     [SerializeField] private int numberOfPlayers;
     [SerializeField] private int personSize;
     private BackgroundManager bgManager;
