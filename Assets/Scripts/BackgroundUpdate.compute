@@ -151,13 +151,17 @@ void BackgroundUpdate (uint3 id : SV_DispatchThreadID)
         totalBeliefStrength += newBeliefScale[beliefIndex];
     }
     
+    float4 squareColor = float4(0, 0, 0, 0);
     for (beliefIndex = 0; beliefIndex < playerBeliefScale.Length; beliefIndex++)
     {
         square.beliefStrength[beliefIndex] = newBeliefScale[beliefIndex] / totalBeliefStrength;
 
         // Update the render color for the square
         // result[square.position] += beliefs[beliefIndex].color * square.beliefStrength[beliefIndex] / 255;
+        squareColor += beliefs[beliefIndex].color * square.beliefStrength[beliefIndex];
     }
+
+    result[square.position] = squareColor;
 
     squares[id.x] = square;
 }

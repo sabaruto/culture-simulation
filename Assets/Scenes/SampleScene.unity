@@ -268,13 +268,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   backgroundShader: {fileID: 7200000, guid: 8458ff921e1c4504db227fae36bf3725, type: 3}
-  squareUpdateRate: 1
-  neighourWeighting: 0.9
+  squareUpdateRate: 90
+  neighourWeighting: 0.3
   squareWeighting: 0.1
   scale: 0.1
   pixelWidth: 160
   pixelHeight: 90
-  renderTexture: {fileID: 0}
 --- !u!114 &2101243283
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -327,8 +326,8 @@ SpriteRenderer:
   m_AutoUVMaxDistance: 0.5
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
-  m_SortingLayerID: 0
-  m_SortingLayer: 0
+  m_SortingLayerID: 356781331
+  m_SortingLayer: -1
   m_SortingOrder: 0
   m_Sprite: {fileID: 0}
   m_Color: {r: 1, g: 1, b: 1, a: 1}

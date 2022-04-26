@@ -9,24 +9,31 @@ public class BackgroundManager : BelieverManager
     [SerializeField] private float neighourWeighting, squareWeighting;
     [SerializeField] private float scale;
     [SerializeField] private int pixelWidth, pixelHeight;
-    [SerializeField] private RenderTexture renderTexture;
+
+    private float updateTimer;
+    private Sprite sprite;
+    private Texture2D tex2d;
+    private RenderTexture renderTexture;
+    private SpriteRenderer spriteRenderer;
+    private GameManager gameManager;
+    private PlayerManager playerManager;
 
     public int PixelWidth => pixelWidth;
     public int PixelHeight => pixelHeight;
     public float Scale => scale;
 
-    private float updateTimer;
-    private GameManager gameManager;
-    private PlayerManager playerManager;
     public void Awake()
     {
         gameManager = GetComponent<GameManager>();
         playerManager = GetComponent<PlayerManager>();
+        spriteRenderer = GetComponent<SpriteRenderer>();
 
         updateTimer = 0;
 
         renderTexture = new RenderTexture(pixelWidth, pixelHeight, 24);
         renderTexture.enableRandomWrite = true;
+        renderTexture.antiAliasing = 0;
+        renderTexture.filterMode = FilterMode.Point;
 
         members = new Member[pixelWidth * pixelHeight];
     }
@@ -46,9 +53,31 @@ public class BackgroundManager : BelieverManager
         }
     }
 
+    // Updates the sprite with the current renderTexture
     public override void UpdateColors()
     {
-        return;
+        tex2d = new Texture2D
+        (
+            renderTexture.width, 
+            renderTexture.height,
+            TextureFormat.RGB24, 
+            false
+        );
+        
+        // ReadPixels looks at the active RenderTexture.
+        RenderTexture.active = renderTexture;
+        tex2d.ReadPixels(new Rect(0, 0, renderTexture.width, renderTexture.height), 0, 0);
+        tex2d.Apply();
+
+        sprite = Sprite.Create
+        (
+            tex2d, 
+            new Rect(0.0f, 0.0f, tex2d.width, tex2d.height), 
+            new Vector2(0.5f, 0.5f), 
+            1 / scale
+        );
+
+        spriteRenderer.sprite = sprite;
     }
 
     public override void Create()
