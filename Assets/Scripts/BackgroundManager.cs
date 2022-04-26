@@ -32,7 +32,7 @@ public class BackgroundManager : BelieverManager
 
         renderTexture = new RenderTexture(pixelWidth, pixelHeight, 24);
         renderTexture.enableRandomWrite = true;
-        renderTexture.antiAliasing = 0;
+        renderTexture.antiAliasing = 1;
         renderTexture.filterMode = FilterMode.Point;
 
         members = new Member[pixelWidth * pixelHeight];
