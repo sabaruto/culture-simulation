@@ -62,7 +62,7 @@ public class BackgroundManager : BelieverManager
 
                 Member currentSquare = new Member
                 {
-                    position = PixelToPosition(x, y), 
+                    position = new Vector2Int(x, y), 
                     beliefScales = currentBeliefs
                 };
                 members[currentIndex] = currentSquare;

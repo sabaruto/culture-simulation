@@ -23,24 +23,23 @@ public class PlayerManager : BelieverManager
     {
         int pixelWidth = bgManager.PixelWidth;
         int pixelHeight = bgManager.PixelHeight;
-        float scale = bgManager.Scale;
         int personRadius = personSize / 2;
 
-        Vector2 minPosition = bgManager.PixelToPosition(personRadius - 1, personRadius - 1);
-        Vector2 maxPosition = bgManager.PixelToPosition(pixelWidth - personRadius, pixelHeight - personRadius);
+        Vector2Int minPosition = new Vector2Int(personRadius - 1, personRadius - 1);
+        Vector2Int maxPosition = new Vector2Int(pixelWidth - personRadius, pixelHeight - personRadius);
 
         for (int playerIndex = 0; playerIndex < numberOfPlayers; playerIndex++)
         {
-            Vector2 position = new Vector2(
-                MathFunctions.Snap(Random.Range(minPosition.x, maxPosition.x), scale),
-                MathFunctions.Snap(Random.Range(minPosition.y, maxPosition.y), scale)
+            Vector2Int position = new Vector2Int(
+                Random.Range(minPosition.x, maxPosition.x),
+                Random.Range(minPosition.y, maxPosition.y)
             );
 
             Vector2 currentBeliefs = new Vector2(Random.value, Random.value);
 
             GameObject currentObject = Instantiate(
                 obj,
-                position,
+                bgManager.PixelToPosition(position[0], position[1]),
                 Quaternion.identity
             );
             Member currentPlayer = new Member{position = position, beliefScales = currentBeliefs};

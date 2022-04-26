@@ -7,7 +7,7 @@ public abstract class BelieverManager : MonoBehaviour
 {
     public struct Member
     {
-        public Vector2 position;
+        public Vector2Int position;
         public Vector2 beliefScales;
     }
     protected Member[] members;

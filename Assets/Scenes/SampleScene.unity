@@ -268,7 +268,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   backgroundShader: {fileID: 7200000, guid: 8458ff921e1c4504db227fae36bf3725, type: 3}
-  squareUpdateRate: 900
+  squareUpdateRate: 1
   neighourWeighting: 0.9
   squareWeighting: 0.1
   scale: 0.1

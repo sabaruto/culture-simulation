@@ -4,7 +4,7 @@
 struct Square
 {
     // TODO Add pixel position
-    float2 position;
+    int2 position;
     float2 beliefStrength;
 };
 
@@ -16,7 +16,7 @@ struct Belief
 struct Player
 {
     // TODO Create variable number of beliefs
-    float2 position;
+    int2 position;
     float2 beliefStrength;
 };
 
@@ -42,9 +42,8 @@ int2 PositionToPixel(float2 pos)
 void BackgroundUpdate (uint3 id : SV_DispatchThreadID)
 {
     Square square = squares[id.x];
-    int2 pixelPosition = PositionToPixel(square.position);
-    int x = pixelPosition[0];
-    int y = pixelPosition[1];
+    int x = square.position[0];
+    int y = square.position[1];
     float newBeliefScale[] = {0, 0};
     
     uint beliefIndex = 0;
@@ -157,7 +156,7 @@ void BackgroundUpdate (uint3 id : SV_DispatchThreadID)
         square.beliefStrength[beliefIndex] = newBeliefScale[beliefIndex] / totalBeliefStrength;
 
         // Update the render color for the square
-        result[pixelPosition] += beliefs[beliefIndex].color * square.beliefStrength[beliefIndex] / 255;
+        // result[square.position] += beliefs[beliefIndex].color * square.beliefStrength[beliefIndex] / 255;
     }
 
     squares[id.x] = square;
