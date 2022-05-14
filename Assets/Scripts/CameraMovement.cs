@@ -1,14 +1,31 @@
+using System.Data.SqlTypes;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
 public class CameraMovement : MonoBehaviour
 {
+    [SerializeField] private GameObject cube;
     [SerializeField] private float zoomFactor;
+    [SerializeField] private bool showCube; 
     private new Camera camera;
     void Awake()
     {
         camera = GetComponent<Camera>();
+    }
+
+    private void drawFullCube()
+    {
+        if (Input.GetKey("mouse 2"))
+        {
+            float cameraRotateX = Input.GetAxis("Mouse X") * zoomFactor;
+            float cameraRotateY = Input.GetAxis("Mouse Y") * zoomFactor;
+
+            // transform.RotateAround(Vector3.zero, Vector3.left - Vector3.Normalize(transform.position), cameraRotateYX);
+            cube.transform.RotateAround(Vector3.zero, Vector3.down, cameraRotateX);
+            cube.transform.RotateAround(Vector3.zero, Vector3.right, cameraRotateY);
+            
+        }
     }
 
     // Update is called once per frame
@@ -25,15 +42,14 @@ public class CameraMovement : MonoBehaviour
             transform.position += cameraVector;
         }
 
-        if (Input.GetKey("mouse 2"))
+        cube.SetActive(showCube);
+        if (showCube)
         {
-            float cameraRotateX = Input.GetAxis("Mouse X") * zoomFactor;
-            float cameraRotateY = Input.GetAxis("Mouse Y") * zoomFactor;
-
-            transform.RotateAround(Vector3.zero, Vector3.up - Vector3.Normalize(transform.position), cameraRotateX);
-            transform.RotateAround(Vector3.zero, Vector3.left - Vector3.Normalize(transform.position), cameraRotateY);
+            drawFullCube();
         }
+        else
+        {
 
-        // Check if the scroll wheel button is pressed
+        }
     }
 }

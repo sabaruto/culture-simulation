@@ -263,7 +263,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 85cc83526f1dc64428c83abc8d5ff2fe, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  cube: {fileID: 123333264}
   zoomFactor: 10
+  showCube: 1
 --- !u!1 &1175933625
 GameObject:
   m_ObjectHideFlags: 0
