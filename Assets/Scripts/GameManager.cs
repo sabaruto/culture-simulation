@@ -8,6 +8,7 @@ public class GameManager : MonoBehaviour
 
     private BackgroundManager bgManager;
     private PlayerManager playerManager;
+    public int NumberOfBeliefs => beliefColors.Length;
 
     private void Awake()
     {

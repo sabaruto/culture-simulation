@@ -8,11 +8,16 @@ public class PlayerManager : BelieverManager
     [SerializeField] private int numberOfPlayers;
     [SerializeField] private int personSize;
     private BackgroundManager bgManager;
+    private GameManager gameManager;
     private GameObject[] memberObjects;
+    private SpriteRenderer[] memberRenderers;
 
-    public void Awake()
+    protected override void Awake()
     {
+        base.Awake();
+
         bgManager = FindObjectOfType<BackgroundManager>();
+        gameManager = FindObjectOfType<GameManager>();
 
         memberObjects = new GameObject[numberOfPlayers];
         memberRenderers = new SpriteRenderer[numberOfPlayers];
@@ -35,18 +40,32 @@ public class PlayerManager : BelieverManager
                 Random.Range(minPosition.y, maxPosition.y)
             );
 
-            Vector2 currentBeliefs = new Vector2(Random.value, Random.value);
+            float[] currentBeliefs = new float[gameManager.NumberOfBeliefs];
+            for (int beliefIndex = 0; beliefIndex < currentBeliefs.Length; beliefIndex++)
+            {
+                currentBeliefs[beliefIndex] = Random.value;
+            }
 
             GameObject currentObject = Instantiate(
                 obj,
                 bgManager.PixelToPosition(position[0], position[1]),
                 Quaternion.identity
             );
-            Member currentPlayer = new Member{position = position, beliefScales = currentBeliefs};
+            Member currentPlayer = CreateMember(position, currentBeliefs);
 
             memberObjects[playerIndex] = currentObject;
             memberRenderers[playerIndex] = currentObject.GetComponent<SpriteRenderer>();
             members[playerIndex] = currentPlayer;
+        }
+    }
+
+    public override void UpdateColors()
+    {
+        for (int memberIndex = 0; memberIndex < members.Length; memberIndex++)
+        {
+            Member currentMember = members[memberIndex];
+            Color averagePlayerColor = GetAverageMemberColor(currentMember);
+            memberRenderers[memberIndex].color = averagePlayerColor;
         }
     }
 }

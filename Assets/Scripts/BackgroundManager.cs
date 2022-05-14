@@ -22,8 +22,10 @@ public class BackgroundManager : BelieverManager
     public int PixelHeight => pixelHeight;
     public float Scale => scale;
 
-    public void Awake()
+    protected override void Awake()
     {
+        base.Awake();
+
         gameManager = GetComponent<GameManager>();
         playerManager = GetComponent<PlayerManager>();
         spriteRenderer = GetComponent<SpriteRenderer>();
@@ -58,12 +60,12 @@ public class BackgroundManager : BelieverManager
     {
         tex2d = new Texture2D
         (
-            renderTexture.width, 
+            renderTexture.width,
             renderTexture.height,
-            TextureFormat.RGB24, 
+            TextureFormat.RGB24,
             false
         );
-        
+
         // ReadPixels looks at the active RenderTexture.
         RenderTexture.active = renderTexture;
         tex2d.ReadPixels(new Rect(0, 0, renderTexture.width, renderTexture.height), 0, 0);
@@ -71,9 +73,9 @@ public class BackgroundManager : BelieverManager
 
         sprite = Sprite.Create
         (
-            tex2d, 
-            new Rect(0.0f, 0.0f, tex2d.width, tex2d.height), 
-            new Vector2(0.5f, 0.5f), 
+            tex2d,
+            new Rect(0.0f, 0.0f, tex2d.width, tex2d.height),
+            new Vector2(0.5f, 0.5f),
             1 / scale
         );
 
@@ -87,13 +89,14 @@ public class BackgroundManager : BelieverManager
             for (int y = 0; y < pixelHeight; y++)
             {
                 int currentIndex = x * pixelHeight + y;
-                Vector2 currentBeliefs = new Vector2(Random.value, Random.value);
+                float[] currentBeliefs = new float[gameManager.NumberOfBeliefs];
 
-                Member currentSquare = new Member
+                for (int beliefIndex = 0; beliefIndex < currentBeliefs.Length; beliefIndex++)
                 {
-                    position = new Vector2Int(x, y), 
-                    beliefScales = currentBeliefs
-                };
+                    currentBeliefs[beliefIndex] = Random.value;
+                }
+
+                Member currentSquare = CreateMember(new Vector2Int(x, y), currentBeliefs);
                 members[currentIndex] = currentSquare;
             }
         }
@@ -104,8 +107,16 @@ public class BackgroundManager : BelieverManager
         int squareSize = Marshal.SizeOf(typeof(Member));
         int playerSize = Marshal.SizeOf(typeof(PlayerManager.Member));
         int beliefSize = Marshal.SizeOf(typeof(Belief));
+        int floatSize = Marshal.SizeOf(typeof(float));
 
         PlayerManager.Member[] bufferPlayers = playerManager.GetBufferMembers();
+        float[] playerBeliefScales = playerManager.BeliefScales;
+        float[] squareBeliefScales = BeliefScales;
+
+        float[] newBeliefScaleData = new float[beliefSize];
+        float[] squareBeliefScaleData = new float[beliefSize];
+        float[] playerBeliefScaleData = new float[beliefSize];
+        float[] neighbourBeliefScaleData = new float[beliefSize];
 
         int kernel = backgroundShader.FindKernel("BackgroundUpdate");
         ComputeBuffer squareBuffer = new ComputeBuffer(members.Length, squareSize);
@@ -113,29 +124,71 @@ public class BackgroundManager : BelieverManager
         ComputeBuffer playerBuffer = new ComputeBuffer(bufferPlayers.Length, playerSize);
         ComputeBuffer beliefBuffer = new ComputeBuffer(Beliefs.Count, beliefSize);
 
+        ComputeBuffer playerBeliefScalesBuffer = new ComputeBuffer
+        (
+            playerBeliefScales.Length,
+            floatSize
+        );
+
+        ComputeBuffer squareBeliefScalesBuffer = new ComputeBuffer
+        (
+            squareBeliefScales.Length,
+            floatSize
+        );
+
+        // Set the internal working buffers
+        ComputeBuffer newBeliefScaleBuffer = new ComputeBuffer(beliefSize, floatSize);
+        ComputeBuffer squareBeliefScaleBuffer = new ComputeBuffer(beliefSize, floatSize);
+        ComputeBuffer playerBeliefScaleBuffer = new ComputeBuffer(beliefSize, floatSize);
+        ComputeBuffer neighbourBeliefScaleBuffer = new ComputeBuffer(beliefSize, floatSize);
+
         squareBuffer.SetData(members);
         workingSquareBuffer.SetData(members);
         playerBuffer.SetData(bufferPlayers);
         beliefBuffer.SetData(Beliefs.AllBeliefs);
 
+        playerBeliefScalesBuffer.SetData(playerBeliefScales);
+        squareBeliefScalesBuffer.SetData(squareBeliefScales);
+
         backgroundShader.SetBuffer(kernel, "squares", squareBuffer);
         backgroundShader.SetBuffer(kernel, "workingSquares", workingSquareBuffer);
         backgroundShader.SetBuffer(kernel, "players", playerBuffer);
         backgroundShader.SetBuffer(kernel, "beliefs", beliefBuffer);
+        backgroundShader.SetBuffer(kernel, "playerBeliefScales", playerBeliefScalesBuffer);
+        backgroundShader.SetBuffer(kernel, "squaresBeliefScales", squareBeliefScalesBuffer);
+
+        backgroundShader.SetBuffer(kernel, "newBeliefScale", newBeliefScaleBuffer);
+        backgroundShader.SetBuffer(kernel, "squareBeliefScale", squareBeliefScaleBuffer);
+        backgroundShader.SetBuffer(kernel, "playerBeliefScale", playerBeliefScaleBuffer);
+        backgroundShader.SetBuffer(kernel, "neighbourBeliefScale", neighbourBeliefScaleBuffer);
+
         backgroundShader.SetInt("width", pixelWidth);
         backgroundShader.SetInt("height", pixelHeight);
         backgroundShader.SetFloat("scale", scale);
         backgroundShader.SetFloat("neighbourWeighting", neighourWeighting);
         backgroundShader.SetFloat("squareWeighting", squareWeighting);
+
         backgroundShader.SetTexture(kernel, "result", renderTexture);
+
         backgroundShader.Dispatch(kernel, members.Length / 32, 1, 1);
 
         squareBuffer.GetData(members);
-        
+        squareBeliefScalesBuffer.GetData(squareBeliefScales);
+        UpdateBeliefScales(squareBeliefScales);
+
+
         squareBuffer.Dispose();
         workingSquareBuffer.Dispose();
         playerBuffer.Dispose();
         beliefBuffer.Dispose();
+
+        playerBeliefScalesBuffer.Dispose();
+        squareBeliefScalesBuffer.Dispose();
+
+        newBeliefScaleBuffer.Dispose();
+        squareBeliefScaleBuffer.Dispose();
+        playerBeliefScaleBuffer.Dispose();
+        neighbourBeliefScaleBuffer.Dispose();
     }
 
     public Vector2 PixelToPosition(int pixelX, int pixelY)

@@ -5,7 +5,8 @@ struct Square
 {
     // TODO Add pixel position
     int2 position;
-    float2 beliefStrength;
+    int beliefPosition;
+    int beliefLength;
 };
 
 struct Belief
@@ -17,7 +18,8 @@ struct Player
 {
     // TODO Create variable number of beliefs
     int2 position;
-    float2 beliefStrength;
+    int beliefPosition;
+    int beliefLength;
 };
 
 int width;
@@ -30,6 +32,15 @@ RWStructuredBuffer<Square> squares;
 RWStructuredBuffer<Square> workingSquares;
 RWStructuredBuffer<Player> players;
 RWStructuredBuffer<Belief> beliefs;
+
+RWStructuredBuffer<float> playerBeliefScales;
+RWStructuredBuffer<float> squaresBeliefScales;
+
+RWStructuredBuffer<float> newBeliefScale;
+RWStructuredBuffer<float> squareBeliefScale;
+RWStructuredBuffer<float> playerBeliefScale;
+RWStructuredBuffer<float> neighbourBeliefScale;
+
 RWTexture2D<float4> result;
 
 
@@ -38,19 +49,28 @@ int2 PositionToPixel(float2 pos)
     return int2(0.5 * (width - 1) + pos[0] / scale, 0.5 * (height - 1) + pos[1] / scale);
 }
 
+float GetSquareBeliefScale(Square square, int index)
+{
+    int memberBeliefScaleIndex = square.beliefPosition + index;
+    return squaresBeliefScales[memberBeliefScaleIndex];
+}
+
+float GetPlayerBeliefScale(Player player, int index)
+{
+    int memberBeliefScaleIndex = player.beliefPosition + index;
+    return playerBeliefScales[memberBeliefScaleIndex];
+}
+
 [numthreads(32,1,1)]
 void BackgroundUpdate (uint3 id : SV_DispatchThreadID)
 {
     Square square = squares[id.x];
     int x = square.position[0];
     int y = square.position[1];
-    float newBeliefScale[] = {0, 0};
     
     uint beliefIndex = 0;
 
     // Define and find average of neighbour and current values
-    float squareBeliefScale[] = {0, 0};
-    float neighbourBeliefScale[] = {0, 0};
     float surroundingSquareIndexes[] = 
     {
         (x-1) * height + y-1,
@@ -109,23 +129,26 @@ void BackgroundUpdate (uint3 id : SV_DispatchThreadID)
         {
             for (beliefIndex = 0; beliefIndex < newBeliefScale.Length; beliefIndex++)
             {
-                neighbourBeliefScale[beliefIndex] += workingSquares[currentIndex].beliefStrength[beliefIndex] / numSurroundingSquares;
+                neighbourBeliefScale[beliefIndex] += GetSquareBeliefScale
+                (
+                    workingSquares[currentIndex], 
+                    beliefIndex
+                ) / numSurroundingSquares;
             }
         }
     }
 
     for (beliefIndex = 0; beliefIndex < newBeliefScale.Length; beliefIndex++)
     {
-        squareBeliefScale[beliefIndex] = square.beliefStrength[beliefIndex] * squareWeighting + neighbourBeliefScale[beliefIndex] * (1 - squareWeighting);
+        squareBeliefScale[beliefIndex] = GetSquareBeliefScale(square, beliefIndex) * squareWeighting + neighbourBeliefScale[beliefIndex] * (1 - squareWeighting);
 
         if (squareBeliefScale[beliefIndex] == 0)
         {
-            squareBeliefScale[beliefIndex] = square.beliefStrength[beliefIndex];
+            squareBeliefScale[beliefIndex] = GetSquareBeliefScale(square, beliefIndex);
         }
     }
 
     // Define and find average player values
-    float playerBeliefScale[] = {0, 0};
     float2 position = square.position;
     
 
@@ -138,7 +161,7 @@ void BackgroundUpdate (uint3 id : SV_DispatchThreadID)
         
         for (beliefIndex = 0; beliefIndex < playerBeliefScale.Length; beliefIndex++)
         {
-            playerBeliefScale[beliefIndex] += currentWeight * currentPlayer.beliefStrength[beliefIndex];
+            playerBeliefScale[beliefIndex] += currentWeight * GetPlayerBeliefScale(currentPlayer, beliefIndex);
         }
     }
 
@@ -154,11 +177,11 @@ void BackgroundUpdate (uint3 id : SV_DispatchThreadID)
     float4 squareColor = float4(0, 0, 0, 0);
     for (beliefIndex = 0; beliefIndex < playerBeliefScale.Length; beliefIndex++)
     {
-        square.beliefStrength[beliefIndex] = newBeliefScale[beliefIndex] / totalBeliefStrength;
+        squaresBeliefScales[square.beliefPosition + beliefIndex] = newBeliefScale[beliefIndex] / totalBeliefStrength;
 
         // Update the render color for the square
         // result[square.position] += beliefs[beliefIndex].color * square.beliefStrength[beliefIndex] / 255;
-        squareColor += beliefs[beliefIndex].color * square.beliefStrength[beliefIndex];
+        squareColor += beliefs[beliefIndex].color * GetSquareBeliefScale(square, beliefIndex);
     }
 
     result[square.position] = squareColor;

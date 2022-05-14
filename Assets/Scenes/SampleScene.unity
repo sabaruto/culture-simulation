@@ -239,8 +239,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   beliefColors:
-  - {r: 0.19824673, g: 0.764151, b: 0.61448324, a: 1}
+  - {r: 0, g: 0, b: 0, a: 1}
   - {r: 0.9433962, g: 0.4696443, b: 0.17354932, a: 1}
+  - {r: 0.49821764, g: 0.059763268, b: 0.745283, a: 1}
 --- !u!4 &2101243281
 Transform:
   m_ObjectHideFlags: 0

@@ -5,37 +5,37 @@ using UnityEngine;
 
 public abstract class BelieverManager : MonoBehaviour
 {
+    /// <summary>
+    /// A member of the beliefs
+    /// </summary>
     public struct Member
     {
         public Vector2Int position;
-        public Vector2 beliefScales;
+        public int beliefPosition;
+        public int beliefLength;
     }
     protected Member[] members;
-    protected SpriteRenderer[] memberRenderers;
-    
+    protected List<float> beliefScales;
     public abstract void Create();
+    public float[] BeliefScales => beliefScales.ToArray();
+    protected virtual void Awake()
+    {
+        beliefScales = new List<float>();
+    }
     public void Update()
     {
         UpdateColors();
     }
-    public virtual void UpdateColors()
-    {
-        for (int memberIndex = 0; memberIndex < members.Length; memberIndex++)
-        {
-            Member currentMember = members[memberIndex];
-            Color averagePlayerColor = GetAverageMemberColor(currentMember);
-            memberRenderers[memberIndex].color = averagePlayerColor;
-        }
-    }
-    private Color GetAverageMemberColor(Member member)
+    public abstract void UpdateColors();
+    protected Color GetAverageMemberColor(Member member)
     {
         Color newColor = Color.black;
         int beliefNumber = Beliefs.Count;
-        
+
         float totalScale = 0;
-        for (int valueIndex = 0; valueIndex < beliefNumber; valueIndex++) 
-        { 
-            totalScale += member.beliefScales[valueIndex]; 
+        for (int valueIndex = 0; valueIndex < beliefNumber; valueIndex++)
+        {
+            totalScale += GetBeliefScale(member, valueIndex);
         }
 
         if (totalScale == 0)
@@ -43,10 +43,10 @@ public abstract class BelieverManager : MonoBehaviour
             return Color.red;
         }
 
-        for (int beliefIndex = 0; beliefIndex < beliefNumber; beliefIndex++) 
+        for (int beliefIndex = 0; beliefIndex < beliefNumber; beliefIndex++)
         {
             Belief currentBelief = Beliefs.GetBelief(beliefIndex);
-            newColor += currentBelief.color * member.beliefScales[beliefIndex] / totalScale;
+            newColor += currentBelief.color * GetBeliefScale(member, beliefIndex) / totalScale;
         }
 
         if (newColor[0] > 1 || newColor[1] > 1 || newColor[2] > 1)
@@ -58,11 +58,39 @@ public abstract class BelieverManager : MonoBehaviour
         {
             newColor = Color.black;
         }
-        
+
         return newColor;
     }
     public Member[] GetBufferMembers()
     {
         return members;
+    }
+
+    public Member CreateMember(Vector2Int position, float[] beliefs)
+    {
+        // Find the end of the belief array
+        int beliefPosition = beliefScales.Count;
+        int beliefLength = beliefs.Length;
+
+        // Add member belief to array
+        beliefScales.AddRange(beliefs);
+        Member newMember = new Member
+        {
+            position = position,
+            beliefPosition = beliefPosition,
+            beliefLength = beliefLength
+        };
+        return newMember;
+    }
+
+    public float GetBeliefScale(Member member, int index)
+    {
+        int memberBeliefScaleIndex = index + member.beliefPosition;
+        return beliefScales[memberBeliefScaleIndex];
+    }
+
+    public void UpdateBeliefScales(float[] newBeliefScales)
+    {
+        beliefScales = new List<float>(newBeliefScales);
     }
 }
