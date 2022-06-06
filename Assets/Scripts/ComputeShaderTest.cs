@@ -1,5 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class ComputeShaderTest : MonoBehaviour
@@ -13,19 +11,19 @@ public class ComputeShaderTest : MonoBehaviour
     private Texture2D currentTexture2d;
 
     // Start is called before the first frame update
-    void Start()
+    private void Start()
     {
         Render(initialTexture2d);
     }
 
-    void Update()
+    private void Update()
     {
         Render(currentTexture2d);
     }
 
-    void Render(Texture2D inputImage)
+    private void Render(Texture2D inputImage)
     {
-        RenderTexture newTexture = new RenderTexture(renderTexture.width, renderTexture.height, 1);
+        var newTexture = new RenderTexture(renderTexture.width, renderTexture.height, 1);
 
         newTexture.enableRandomWrite = true;
         computeShader.SetTexture(0, "Result", newTexture);

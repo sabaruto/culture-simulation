@@ -1,6 +1,7 @@
+using System;
 using UnityEngine;
 
-[System.Serializable]
+[Serializable]
 public struct Belief
 {
     public Color color;
@@ -8,24 +9,19 @@ public struct Belief
 
 public static class Beliefs
 {
-    private static Belief[] beliefs;
+    public static Belief[] AllBeliefs { get; private set; }
+
+    public static int Count => AllBeliefs.Length;
 
     public static void Initialize(Color[] colors)
     {
-        beliefs = new Belief[colors.Length];
+        AllBeliefs = new Belief[colors.Length];
 
-        for (int index = 0; index < colors.Length; index++)
-        {
-            beliefs[index] = new Belief { color = colors[index] };
-        }
+        for (var index = 0; index < colors.Length; index++) AllBeliefs[index] = new Belief { color = colors[index] };
     }
 
     public static Belief GetBelief(int index)
     {
-        return beliefs[index];
+        return AllBeliefs[index];
     }
-
-    public static Belief[] AllBeliefs => beliefs;
-
-    public static int Count => beliefs.Length;
 }

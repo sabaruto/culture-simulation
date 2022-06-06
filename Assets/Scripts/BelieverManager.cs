@@ -1,73 +1,59 @@
-using System;
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public abstract class BelieverManager : MonoBehaviour
 {
-    public struct Member
-    {
-        public Vector2Int position;
-        public Vector2 beliefScales;
-    }
+    protected SpriteRenderer[] MemberRenderers;
 
-    protected Member[] members;
-    protected SpriteRenderer[] memberRenderers;
-
-    public abstract void Create();
+    protected Member[] Members;
 
     public void Update()
     {
         UpdateColors();
     }
 
+    public abstract void Create();
+
     public virtual void UpdateColors()
     {
-        for (int memberIndex = 0; memberIndex < members.Length; memberIndex++)
+        for (var memberIndex = 0; memberIndex < Members.Length; memberIndex++)
         {
-            Member currentMember = members[memberIndex];
-            Color averagePlayerColor = GetAverageMemberColor(currentMember);
-            memberRenderers[memberIndex].color = averagePlayerColor;
+            var currentMember = Members[memberIndex];
+            var averagePlayerColor = GetAverageMemberColor(currentMember);
+            MemberRenderers[memberIndex].color = averagePlayerColor;
         }
     }
 
     private Color GetAverageMemberColor(Member member)
     {
-        Color newColor = Color.black;
-        int beliefNumber = Beliefs.Count;
+        var newColor = Color.black;
+        var beliefNumber = Beliefs.Count;
 
         float totalScale = 0;
-        for (int valueIndex = 0; valueIndex < beliefNumber; valueIndex++)
-        {
-            totalScale += member.beliefScales[valueIndex];
-        }
+        for (var valueIndex = 0; valueIndex < beliefNumber; valueIndex++) totalScale += member.beliefScales[valueIndex];
 
-        if (totalScale == 0)
-        {
-            return Color.red;
-        }
+        if (totalScale == 0) return Color.red;
 
-        for (int beliefIndex = 0; beliefIndex < beliefNumber; beliefIndex++)
+        for (var beliefIndex = 0; beliefIndex < beliefNumber; beliefIndex++)
         {
-            Belief currentBelief = Beliefs.GetBelief(beliefIndex);
+            var currentBelief = Beliefs.GetBelief(beliefIndex);
             newColor += currentBelief.color * member.beliefScales[beliefIndex] / totalScale;
         }
 
-        if (newColor[0] > 1 || newColor[1] > 1 || newColor[2] > 1)
-        {
-            newColor = Color.white;
-        }
+        if (newColor[0] > 1 || newColor[1] > 1 || newColor[2] > 1) newColor = Color.white;
 
-        if (newColor[0] < 0 || newColor[1] < 0 || newColor[2] < 0)
-        {
-            newColor = Color.black;
-        }
+        if (newColor[0] < 0 || newColor[1] < 0 || newColor[2] < 0) newColor = Color.black;
 
         return newColor;
     }
 
     public Member[] GetBufferMembers()
     {
-        return members;
+        return Members;
+    }
+
+    public struct Member
+    {
+        public Vector2Int position;
+        public Vector2 beliefScales;
     }
 }

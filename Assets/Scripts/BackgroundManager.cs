@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using UnityEngine;
 
@@ -6,17 +5,17 @@ public class BackgroundManager : BelieverManager
 {
     [SerializeField] private ComputeShader backgroundShader;
     [SerializeField] private float squareUpdateRate;
-    [SerializeField] private float neighourWeighting, squareWeighting;
+    [SerializeField] private float neighbourWeighting, squareWeighting;
     [SerializeField] private float scale;
     [SerializeField] private int pixelWidth, pixelHeight;
-
-    private float updateTimer;
-    private Sprite sprite;
-    private Texture2D tex2d;
-    private RenderTexture renderTexture;
-    private SpriteRenderer spriteRenderer;
     private GameManager gameManager;
     private PlayerManager playerManager;
+    private RenderTexture renderTexture;
+    private Sprite sprite;
+    private SpriteRenderer spriteRenderer;
+    private Texture2D tex2d;
+
+    private float updateTimer;
 
     public int PixelWidth => pixelWidth;
     public int PixelHeight => pixelHeight;
@@ -35,7 +34,7 @@ public class BackgroundManager : BelieverManager
         renderTexture.antiAliasing = 1;
         renderTexture.filterMode = FilterMode.Point;
 
-        members = new Member[pixelWidth * pixelHeight];
+        Members = new Member[pixelWidth * pixelHeight];
     }
 
     public void Start()
@@ -83,39 +82,37 @@ public class BackgroundManager : BelieverManager
 
     public override void Create()
     {
-        for (int x = 0; x < pixelWidth; x++)
+        for (var x = 0; x < pixelWidth; x++)
+        for (var y = 0; y < pixelHeight; y++)
         {
-            for (int y = 0; y < pixelHeight; y++)
-            {
-                int currentIndex = x * pixelHeight + y;
-                Vector2 currentBeliefs = new Vector2(Random.value, Random.value);
+            var currentIndex = x * pixelHeight + y;
+            var currentBeliefs = new Vector2(Random.value, Random.value);
 
-                Member currentSquare = new Member
-                {
-                    position = new Vector2Int(x, y),
-                    beliefScales = currentBeliefs
-                };
-                members[currentIndex] = currentSquare;
-            }
+            var currentSquare = new Member
+            {
+                position = new Vector2Int(x, y),
+                beliefScales = currentBeliefs
+            };
+            Members[currentIndex] = currentSquare;
         }
     }
 
     private void UpdateSquares()
     {
-        int squareSize = Marshal.SizeOf(typeof(Member));
-        int playerSize = Marshal.SizeOf(typeof(PlayerManager.Member));
-        int beliefSize = Marshal.SizeOf(typeof(Belief));
+        var squareSize = Marshal.SizeOf(typeof(Member));
+        var playerSize = Marshal.SizeOf(typeof(Member));
+        var beliefSize = Marshal.SizeOf(typeof(Belief));
 
-        PlayerManager.Member[] bufferPlayers = playerManager.GetBufferMembers();
+        var bufferPlayers = playerManager.GetBufferMembers();
 
-        int kernel = backgroundShader.FindKernel("BackgroundUpdate");
-        ComputeBuffer squareBuffer = new ComputeBuffer(members.Length, squareSize);
-        ComputeBuffer workingSquareBuffer = new ComputeBuffer(members.Length, squareSize);
-        ComputeBuffer playerBuffer = new ComputeBuffer(bufferPlayers.Length, playerSize);
-        ComputeBuffer beliefBuffer = new ComputeBuffer(Beliefs.Count, beliefSize);
+        var kernel = backgroundShader.FindKernel("BackgroundUpdate");
+        var squareBuffer = new ComputeBuffer(Members.Length, squareSize);
+        var workingSquareBuffer = new ComputeBuffer(Members.Length, squareSize);
+        var playerBuffer = new ComputeBuffer(bufferPlayers.Length, playerSize);
+        var beliefBuffer = new ComputeBuffer(Beliefs.Count, beliefSize);
 
-        squareBuffer.SetData(members);
-        workingSquareBuffer.SetData(members);
+        squareBuffer.SetData(Members);
+        workingSquareBuffer.SetData(Members);
         playerBuffer.SetData(bufferPlayers);
         beliefBuffer.SetData(Beliefs.AllBeliefs);
 
@@ -126,12 +123,12 @@ public class BackgroundManager : BelieverManager
         backgroundShader.SetInt("width", pixelWidth);
         backgroundShader.SetInt("height", pixelHeight);
         backgroundShader.SetFloat("scale", scale);
-        backgroundShader.SetFloat("neighbourWeighting", neighourWeighting);
+        backgroundShader.SetFloat("neighbourWeighting", neighbourWeighting);
         backgroundShader.SetFloat("squareWeighting", squareWeighting);
         backgroundShader.SetTexture(kernel, "result", renderTexture);
-        backgroundShader.Dispatch(kernel, members.Length / 32, 1, 1);
+        backgroundShader.Dispatch(kernel, Members.Length / 32, 1, 1);
 
-        squareBuffer.GetData(members);
+        squareBuffer.GetData(Members);
 
         squareBuffer.Dispose();
         workingSquareBuffer.Dispose();
