@@ -16,7 +16,7 @@ public static class Beliefs
 
         for (int index = 0; index < colors.Length; index++)
         {
-            beliefs[index] = new Belief{color = colors[index]};
+            beliefs[index] = new Belief { color = colors[index] };
         }
     }
 

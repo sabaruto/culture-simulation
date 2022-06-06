@@ -37,6 +37,7 @@ public class BackgroundManager : BelieverManager
 
         members = new Member[pixelWidth * pixelHeight];
     }
+
     public void Start()
     {
         Create();
@@ -58,12 +59,12 @@ public class BackgroundManager : BelieverManager
     {
         tex2d = new Texture2D
         (
-            renderTexture.width, 
+            renderTexture.width,
             renderTexture.height,
-            TextureFormat.RGB24, 
+            TextureFormat.RGB24,
             false
         );
-        
+
         // ReadPixels looks at the active RenderTexture.
         RenderTexture.active = renderTexture;
         tex2d.ReadPixels(new Rect(0, 0, renderTexture.width, renderTexture.height), 0, 0);
@@ -71,9 +72,9 @@ public class BackgroundManager : BelieverManager
 
         sprite = Sprite.Create
         (
-            tex2d, 
-            new Rect(0.0f, 0.0f, tex2d.width, tex2d.height), 
-            new Vector2(0.5f, 0.5f), 
+            tex2d,
+            new Rect(0.0f, 0.0f, tex2d.width, tex2d.height),
+            new Vector2(0.5f, 0.5f),
             1 / scale
         );
 
@@ -91,7 +92,7 @@ public class BackgroundManager : BelieverManager
 
                 Member currentSquare = new Member
                 {
-                    position = new Vector2Int(x, y), 
+                    position = new Vector2Int(x, y),
                     beliefScales = currentBeliefs
                 };
                 members[currentIndex] = currentSquare;
@@ -131,7 +132,7 @@ public class BackgroundManager : BelieverManager
         backgroundShader.Dispatch(kernel, members.Length / 32, 1, 1);
 
         squareBuffer.GetData(members);
-        
+
         squareBuffer.Dispose();
         workingSquareBuffer.Dispose();
         playerBuffer.Dispose();

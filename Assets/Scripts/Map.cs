@@ -15,10 +15,12 @@ public class Map<T1, T2>
     public class Indexer<T3, T4>
     {
         private Dictionary<T3, T4> _dictionary;
+
         public Indexer(Dictionary<T3, T4> dictionary)
         {
             _dictionary = dictionary;
         }
+
         public T4 this[T3 index]
         {
             get { return _dictionary[index]; }

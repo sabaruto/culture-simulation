@@ -8,7 +8,7 @@ Texture2D<float4> InputImage;
 int Resolution;
 
 [numthreads(32,32,1)]
-void CSMain (uint3 id : SV_DispatchThreadID)
+void CSMain(uint3 id : SV_DispatchThreadID)
 {
     // float2 aboveShift = float2(id.x, (id.y + 1) % 512);
     // float2 leftShift = float2((id.x -1) % 512, id.y);
@@ -30,9 +30,9 @@ void CSMain (uint3 id : SV_DispatchThreadID)
 
             Result[id.xy] = float4
             (
-                Result[id.xy].x * (numSampledPixels - 1) + InputImage[index].x, 
-                Result[id.xy].y * (numSampledPixels - 1) + InputImage[index].y, 
-                Result[id.xy].z * (numSampledPixels - 1) + InputImage[index].z, 
+                Result[id.xy].x * (numSampledPixels - 1) + InputImage[index].x,
+                Result[id.xy].y * (numSampledPixels - 1) + InputImage[index].y,
+                Result[id.xy].z * (numSampledPixels - 1) + InputImage[index].z,
                 0.0
             );
 

@@ -4,14 +4,11 @@ using UnityEngine;
 
 public class ComputeShaderTest : MonoBehaviour
 {
-    [SerializeField]
-    private ComputeShader computeShader;
+    [SerializeField] private ComputeShader computeShader;
 
-    [SerializeField]
-    private RenderTexture renderTexture;
+    [SerializeField] private RenderTexture renderTexture;
 
-    [SerializeField]
-    private Texture2D initialTexture2d;
+    [SerializeField] private Texture2D initialTexture2d;
 
     private Texture2D currentTexture2d;
 

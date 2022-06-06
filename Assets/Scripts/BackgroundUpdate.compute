@@ -39,30 +39,30 @@ int2 PositionToPixel(float2 pos)
 }
 
 [numthreads(32,1,1)]
-void BackgroundUpdate (uint3 id : SV_DispatchThreadID)
+void BackgroundUpdate(uint3 id : SV_DispatchThreadID)
 {
     Square square = squares[id.x];
     int x = square.position[0];
     int y = square.position[1];
     float newBeliefScale[] = {0, 0};
-    
+
     uint beliefIndex = 0;
 
     // Define and find average of neighbour and current values
     float squareBeliefScale[] = {0, 0};
     float neighbourBeliefScale[] = {0, 0};
-    float surroundingSquareIndexes[] = 
+    float surroundingSquareIndexes[] =
     {
-        (x-1) * height + y-1,
-        x * height + y-1,
-        (x+1) * height + y-1,
-        (x+1) * height + y,
-        (x+1) * height + y+1,
-        x * height + y+1,
-        (x-1) * height + y+1,
-        (x-1) * height + y,
+        (x - 1) * height + y - 1,
+        x * height + y - 1,
+        (x + 1) * height + y - 1,
+        (x + 1) * height + y,
+        (x + 1) * height + y + 1,
+        x * height + y + 1,
+        (x - 1) * height + y + 1,
+        (x - 1) * height + y,
         x * height + y,
-        
+
     };
 
     int accessableSquares[] = {1, 1, 1, 1, 1, 1, 1, 1, 1};
@@ -109,14 +109,16 @@ void BackgroundUpdate (uint3 id : SV_DispatchThreadID)
         {
             for (beliefIndex = 0; beliefIndex < newBeliefScale.Length; beliefIndex++)
             {
-                neighbourBeliefScale[beliefIndex] += workingSquares[currentIndex].beliefStrength[beliefIndex] / numSurroundingSquares;
+                neighbourBeliefScale[beliefIndex] += workingSquares[currentIndex].beliefStrength[beliefIndex] /
+                    numSurroundingSquares;
             }
         }
     }
 
     for (beliefIndex = 0; beliefIndex < newBeliefScale.Length; beliefIndex++)
     {
-        squareBeliefScale[beliefIndex] = square.beliefStrength[beliefIndex] * squareWeighting + neighbourBeliefScale[beliefIndex] * (1 - squareWeighting);
+        squareBeliefScale[beliefIndex] = square.beliefStrength[beliefIndex] * squareWeighting + neighbourBeliefScale[
+            beliefIndex] * (1 - squareWeighting);
 
         if (squareBeliefScale[beliefIndex] == 0)
         {
@@ -127,7 +129,7 @@ void BackgroundUpdate (uint3 id : SV_DispatchThreadID)
     // Define and find average player values
     float playerBeliefScale[] = {0, 0};
     float2 position = square.position;
-    
+
 
     for (uint playerIndex = 0; playerIndex < players.Length; playerIndex++)
     {
@@ -135,7 +137,7 @@ void BackgroundUpdate (uint3 id : SV_DispatchThreadID)
         float2 distanceVector = position - currentPlayer.position;
         float distance = sqrt(distanceVector[0] * distanceVector[0] + distanceVector[1] * distanceVector[1]);
         float currentWeight = clamp(0.5f - 0.5f * distance * distance, 0, 1);
-        
+
         for (beliefIndex = 0; beliefIndex < playerBeliefScale.Length; beliefIndex++)
         {
             playerBeliefScale[beliefIndex] += currentWeight * currentPlayer.beliefStrength[beliefIndex];
@@ -146,11 +148,12 @@ void BackgroundUpdate (uint3 id : SV_DispatchThreadID)
     float totalBeliefStrength = 0;
     for (beliefIndex = 0; beliefIndex < playerBeliefScale.Length; beliefIndex++)
     {
-        newBeliefScale[beliefIndex] = squareBeliefScale[beliefIndex] * neighbourWeighting + playerBeliefScale[beliefIndex] * (1 - neighbourWeighting);
+        newBeliefScale[beliefIndex] = squareBeliefScale[beliefIndex] * neighbourWeighting + playerBeliefScale[
+            beliefIndex] * (1 - neighbourWeighting);
 
         totalBeliefStrength += newBeliefScale[beliefIndex];
     }
-    
+
     float4 squareColor = float4(0, 0, 0, 0);
     for (beliefIndex = 0; beliefIndex < playerBeliefScale.Length; beliefIndex++)
     {

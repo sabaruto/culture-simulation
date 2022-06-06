@@ -42,7 +42,7 @@ public class PlayerManager : BelieverManager
                 bgManager.PixelToPosition(position[0], position[1]),
                 Quaternion.identity
             );
-            Member currentPlayer = new Member{position = position, beliefScales = currentBeliefs};
+            Member currentPlayer = new Member { position = position, beliefScales = currentBeliefs };
 
             memberObjects[playerIndex] = currentObject;
             memberRenderers[playerIndex] = currentObject.GetComponent<SpriteRenderer>();
