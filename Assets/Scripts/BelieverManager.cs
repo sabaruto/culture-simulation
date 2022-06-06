@@ -2,18 +2,31 @@ using UnityEngine;
 
 public abstract class BelieverManager : MonoBehaviour
 {
-    protected SpriteRenderer[] MemberRenderers;
+    [SerializeField] protected float updateRate;
 
+    protected SpriteRenderer[] MemberRenderers;
     protected Member[] Members;
+
+    private float updateTimer;
 
     public void Update()
     {
         UpdateColors();
     }
 
-    public abstract void Create();
+    public void FixedUpdate()
+    {
+        updateTimer += Time.fixedDeltaTime;
 
-    public virtual void UpdateColors()
+        if (!(updateTimer > 1 / updateRate)) return;
+        updateTimer = 0;
+        UpdateMembers();
+    }
+
+    public abstract void Create();
+    protected abstract void UpdateMembers();
+
+    protected virtual void UpdateColors()
     {
         for (var memberIndex = 0; memberIndex < Members.Length; memberIndex++)
         {

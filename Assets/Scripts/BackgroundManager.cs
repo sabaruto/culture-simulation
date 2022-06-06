@@ -4,18 +4,14 @@ using UnityEngine;
 public class BackgroundManager : BelieverManager
 {
     [SerializeField] private ComputeShader backgroundShader;
-    [SerializeField] private float squareUpdateRate;
     [SerializeField] private float neighbourWeighting, squareWeighting;
     [SerializeField] private float scale;
     [SerializeField] private int pixelWidth, pixelHeight;
-    private GameManager gameManager;
     private PlayerManager playerManager;
     private RenderTexture renderTexture;
     private Sprite sprite;
     private SpriteRenderer spriteRenderer;
     private Texture2D tex2d;
-
-    private float updateTimer;
 
     public int PixelWidth => pixelWidth;
     public int PixelHeight => pixelHeight;
@@ -23,11 +19,8 @@ public class BackgroundManager : BelieverManager
 
     public void Awake()
     {
-        gameManager = GetComponent<GameManager>();
         playerManager = GetComponent<PlayerManager>();
         spriteRenderer = GetComponent<SpriteRenderer>();
-
-        updateTimer = 0;
 
         renderTexture = new RenderTexture(pixelWidth, pixelHeight, 24);
         renderTexture.enableRandomWrite = true;
@@ -42,19 +35,8 @@ public class BackgroundManager : BelieverManager
         Create();
     }
 
-    public void FixedUpdate()
-    {
-        updateTimer += Time.fixedDeltaTime;
-
-        if (updateTimer > 1 / squareUpdateRate)
-        {
-            updateTimer = 0;
-            UpdateSquares();
-        }
-    }
-
     // Updates the sprite with the current renderTexture
-    public override void UpdateColors()
+    protected override void UpdateColors()
     {
         tex2d = new Texture2D
         (
@@ -97,7 +79,7 @@ public class BackgroundManager : BelieverManager
         }
     }
 
-    private void UpdateSquares()
+    protected override void UpdateMembers()
     {
         var squareSize = Marshal.SizeOf(typeof(Member));
         var playerSize = Marshal.SizeOf(typeof(Member));

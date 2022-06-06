@@ -17,6 +17,11 @@ public class PlayerManager : BelieverManager
         Members = new Member[numberOfPlayers];
     }
 
+    protected override void UpdateMembers()
+    {
+        // Todo: Attach playerUpdate.compute to this function
+    }
+
     public override void Create()
     {
         var pixelWidth = bgManager.PixelWidth;
