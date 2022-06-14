@@ -269,7 +269,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   updateRate: 3000
   backgroundShader: {fileID: 7200000, guid: 8458ff921e1c4504db227fae36bf3725, type: 3}
-  neighbourWeighting: 0.3
+  neighbourWeighting: 0.1
   squareWeighting: 0.1
   scale: 0.1
   pixelWidth: 160
@@ -286,9 +286,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1a8c00414a4c1744ab9ba3fe4488a22c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  updateRate: 0
+  updateRate: 3000
+  playerShader: {fileID: 7200000, guid: 7456a56aa833a644384544a7803cebcf, type: 3}
+  playerWeighting: 0.99
   obj: {fileID: 2633714743010374468, guid: 5f1d4f567636ef04b8eef4583eb5ff77, type: 3}
-  numberOfPlayers: 30
+  numberOfPlayers: 90
   personSize: 8
 --- !u!212 &2101243284
 SpriteRenderer:

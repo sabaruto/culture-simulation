@@ -1,7 +1,10 @@
+using System.Runtime.InteropServices;
 using UnityEngine;
 
 public class PlayerManager : BelieverManager
 {
+    [SerializeField] private ComputeShader playerShader;
+    [SerializeField] private float playerWeighting;
     [SerializeField] protected GameObject obj;
     [SerializeField] private int numberOfPlayers;
     [SerializeField] private int personSize;
@@ -19,7 +22,35 @@ public class PlayerManager : BelieverManager
 
     protected override void UpdateMembers()
     {
-        // Todo: Attach playerUpdate.compute to this function
+        var squareSize = Marshal.SizeOf(typeof(Member));
+        var playerSize = Marshal.SizeOf(typeof(Member));
+        var beliefSize = Marshal.SizeOf(typeof(Belief));
+
+        var bufferSquares = bgManager.GetBufferMembers();
+
+        var kernel = playerShader.FindKernel("PlayerUpdate");
+        var squareBuffer = new ComputeBuffer(bufferSquares.Length, squareSize);
+        var playerBuffer = new ComputeBuffer(Members.Length, playerSize);
+        var beliefBuffer = new ComputeBuffer(Beliefs.Count, beliefSize);
+        
+        squareBuffer.SetData(bufferSquares);
+        playerBuffer.SetData(Members);
+        beliefBuffer.SetData(Beliefs.AllBeliefs);
+        
+        playerShader.SetBuffer(kernel, "squares", squareBuffer);
+        playerShader.SetBuffer(kernel, "players", playerBuffer);
+        playerShader.SetBuffer(kernel, "beliefs", beliefBuffer);
+        playerShader.SetInt("width", bgManager.PixelWidth);
+        playerShader.SetInt("height", bgManager.PixelHeight);
+        playerShader.SetFloat("scale", bgManager.Scale);
+        playerShader.SetFloat("playerWeighting", playerWeighting);
+        playerShader.Dispatch(kernel, Members.Length, 1, 1);
+        
+        playerBuffer.GetData(Members);
+        
+        squareBuffer.Dispose();
+        playerBuffer.Dispose();
+        beliefBuffer.Dispose();
     }
 
     public override void Create()

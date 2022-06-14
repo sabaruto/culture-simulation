@@ -96,9 +96,9 @@ void BackgroundUpdate(uint3 id : SV_DispatchThreadID)
     }
 
     int numSurroundingSquares = 0;
-    for (uint accessableIndex = 0; accessableIndex < accessableSquares.Length; accessableIndex++)
+    for (uint accessibleIndex = 0; accessibleIndex < accessableSquares.Length; accessibleIndex++)
     {
-        numSurroundingSquares += accessableSquares[accessableIndex];
+        numSurroundingSquares += accessableSquares[accessibleIndex];
     }
 
     for (uint indexIndex = 0; indexIndex < surroundingSquareIndexes.Length; indexIndex++)

@@ -1,15 +1,127 @@
 // Each #kernel tells which function to compile; you can have many kernels
-#pragma kernel CSMain
+#pragma kernel PlayerUpdate
 
-// Create a RenderTexture with enableRandomWrite flag and set it
-// with cs.SetTexture
-RWTexture2D<float4> Result;
+struct Square
+{
+    // TODO Add pixel position
+    int2 position;
+    float2 beliefStrength;
+};
+
+struct Belief
+{
+    float4 color;
+};
+
+struct Player
+{
+    // TODO Create variable number of beliefs
+    int2 position;
+    float2 beliefStrength;
+};
+
+int width;
+int height;
+float scale;
+float playerWeighting;
+
+RWStructuredBuffer<Square> squares;
+RWStructuredBuffer<Player> players;
+RWStructuredBuffer<Belief> beliefs;
 
 // Todo: Use the background manager as a base to update the player's beliefs
-[numthreads(8,8,1)]
-void CSMain(uint3 id : SV_DispatchThreadID)
+[numthreads(1,1,1)]
+void PlayerUpdate(uint3 id : SV_DispatchThreadID)
 {
-    // TODO: insert actual code here!
+    Player player = players[id.x];
+    const int x = player.position[0];
+    const int y = player.position[1];
+    float newBeliefScale[] = {0, 0};
 
-    Result[id.xy] = float4(id.x & id.y, (id.x & 15) / 15.0, (id.y & 15) / 15.0, 0.0);
+    uint beliefIndex = 0;
+
+    // Define and find average of neighbour and current values
+    float squareBeliefScale[] = {0, 0};
+    float neighbourBeliefScale[] = {0, 0};
+    float surroundingSquareIndexes[] =
+    {
+        (x - 1) * height + y - 1,
+        x * height + y - 1,
+        (x + 1) * height + y - 1,
+        (x + 1) * height + y,
+        (x + 1) * height + y + 1,
+        x * height + y + 1,
+        (x - 1) * height + y + 1,
+        (x - 1) * height + y,
+        x * height + y,
+
+    };
+
+    int accessableSquares[] = {1, 1, 1, 1, 1, 1, 1, 1, 1};
+
+    if (x == 0)
+    {
+        accessableSquares[0] = 0;
+        accessableSquares[6] = 0;
+        accessableSquares[7] = 0;
+    }
+
+    if (y == 0)
+    {
+        accessableSquares[0] = 0;
+        accessableSquares[1] = 0;
+        accessableSquares[2] = 0;
+    }
+
+    if (x + 1 == width)
+    {
+        accessableSquares[2] = 0;
+        accessableSquares[3] = 0;
+        accessableSquares[4] = 0;
+    }
+
+    if (y + 1 == height)
+    {
+        accessableSquares[4] = 0;
+        accessableSquares[5] = 0;
+        accessableSquares[6] = 0;
+    }
+
+    int numSurroundingSquares = 0;
+    for (uint accessibleIndex = 0; accessibleIndex < accessableSquares.Length; accessibleIndex++)
+    {
+        numSurroundingSquares += accessableSquares[accessibleIndex];
+    }
+
+    for (uint indexIndex = 0; indexIndex < surroundingSquareIndexes.Length; indexIndex++)
+    {
+        int currentIndex = surroundingSquareIndexes[indexIndex];
+
+        if (accessableSquares[indexIndex] == 1)
+        {
+            for (beliefIndex = 0; beliefIndex < newBeliefScale.Length; beliefIndex++)
+            {
+                neighbourBeliefScale[beliefIndex] += squares[currentIndex].beliefStrength[beliefIndex] /
+                    numSurroundingSquares;
+            }
+        }
+    }
+
+    for (beliefIndex = 0; beliefIndex < newBeliefScale.Length; beliefIndex++)
+    {
+        squareBeliefScale[beliefIndex] = player.beliefStrength[beliefIndex] * playerWeighting + neighbourBeliefScale[
+            beliefIndex] * (1 - playerWeighting);
+
+        if (squareBeliefScale[beliefIndex] == 0)
+        {
+            squareBeliefScale[beliefIndex] = player.beliefStrength[beliefIndex];
+        }
+    }
+
+    for (beliefIndex = 0; beliefIndex < squareBeliefScale.Length; beliefIndex++)
+    {
+        player.beliefStrength[beliefIndex] = squareBeliefScale[beliefIndex];
+    }
+
+    players[id.x] = player;
 }
