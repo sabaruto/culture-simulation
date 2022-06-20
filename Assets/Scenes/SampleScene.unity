@@ -288,7 +288,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   updateRate: 3000
   playerShader: {fileID: 7200000, guid: 7456a56aa833a644384544a7803cebcf, type: 3}
-  playerWeighting: 0.99
+  playerWeighting: 0.999
   obj: {fileID: 2633714743010374468, guid: 5f1d4f567636ef04b8eef4583eb5ff77, type: 3}
   numberOfPlayers: 90
   personSize: 8
